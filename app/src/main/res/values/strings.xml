@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name" translatable="false">SafeWork</string>
+    <string name="welcome_message">Welcome to SafeWork</string>
+</resources>
