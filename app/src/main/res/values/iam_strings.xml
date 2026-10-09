@@ -1,4 +1,12 @@
 <resources>
+    <string name="iam_login_heading">Log in to SafeWork</string>
+    <string name="iam_login_subtitle">Log in to your company account.</string>
+    <string name="iam_register_heading">Join your team</string>
+    <string name="iam_register_subtitle">Create your account with a company invitation.</string>
+    <string name="iam_profile_subtitle">Your account and company details.</string>
+    <string name="iam_edit_subtitle">Keep your contact details up to date.</string>
+    <string name="iam_workplace_heading">Your workplace</string>
+    <string name="iam_phone_label">Phone</string>
     <string name="iam_login">Log in</string>
     <string name="iam_email">Email</string>
     <string name="iam_password">Password</string>
@@ -12,7 +20,6 @@
     <string name="iam_profile">My profile</string>
     <string name="iam_company">Company ID: %1$d</string>
     <string name="iam_roles">Roles: %1$s</string>
-    <string name="iam_phone_display">Phone: %1$s</string>
     <string name="iam_not_provided">Not provided</string>
     <string name="iam_edit_profile">Edit profile</string>
     <string name="iam_refresh_profile">Refresh profile</string>

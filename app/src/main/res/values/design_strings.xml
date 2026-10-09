@@ -1,0 +1,13 @@
+<resources>
+    <string name="design_brand_caption">Workplace safety</string>
+    <string name="design_loading">Please wait…</string>
+    <string name="design_show_password">Show password</string>
+    <string name="design_hide_password">Hide password</string>
+    <string name="design_password_visible">Password visible</string>
+    <string name="design_password_hidden">Password hidden</string>
+    <string name="design_nav_profile">Profile</string>
+    <string name="design_notifications_caption">Updates about your reported incidents and responsibilities.</string>
+    <string name="design_notifications_empty_caption">Incident activity will appear here when the server sends you an update.</string>
+    <string name="design_incidents_caption">Report a hazard and follow your workplace incidents.</string>
+    <string name="design_nav_notifications">Alerts</string>
+</resources>

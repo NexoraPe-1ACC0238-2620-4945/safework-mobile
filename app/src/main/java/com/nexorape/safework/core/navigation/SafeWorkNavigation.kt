@@ -16,6 +16,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nexorape.safework.R
+import com.nexorape.safework.core.designsystem.components.*
 import com.nexorape.safework.core.configuration.AppGraph
 import com.nexorape.safework.iam.domain.model.Role
 import com.nexorape.safework.iam.presentation.*
@@ -48,15 +49,13 @@ fun SafeWorkNavigation(identity: IdentityViewModel, graph: AppGraph) {
     BackHandler(enabled = destination != Destination.PROFILE) { destination = Destination.PROFILE }
     val businessUser = Role.WORKER in user.roles || Role.EMPLOYER in user.roles
     val context = LocalContext.current
-    Surface(Modifier.fillMaxSize()) {
-        Column(Modifier.fillMaxSize().safeDrawingPadding()) {
-            Row {
-                TextButton(onClick = { destination = Destination.PROFILE }) { Text(stringResource(R.string.iam_profile)) }
-                if (businessUser) {
-                    TextButton(onClick = { destination = Destination.INCIDENTS }) { Text(stringResource(R.string.incidents_title)) }
-                    TextButton(onClick = { destination = Destination.NOTIFICATIONS }) { Text(stringResource(R.string.notifications_title)) }
-                }
-            }
+    val entries = listOfNotNull(
+        SafeWorkNavItem(stringResource(R.string.design_nav_profile), SafeWorkIcons.Person),
+        if (businessUser) SafeWorkNavItem(stringResource(R.string.incidents_title), SafeWorkIcons.Incidents) else null,
+        if (businessUser) SafeWorkNavItem(stringResource(R.string.design_nav_notifications), SafeWorkIcons.Bell) else null,
+    )
+    SafeWorkShell(entries, if (businessUser) destination.ordinal else 0,
+        onSelect = { destination = Destination.entries[it] }) {
             if (destination == Destination.INCIDENTS && businessUser) {
                 val incidentModel: IncidentViewModel = viewModel(key = "incident-${user.id.value}-${user.companyId.value}-$revision",
                     factory = object : ViewModelProvider.Factory {
@@ -91,7 +90,6 @@ fun SafeWorkNavigation(identity: IdentityViewModel, graph: AppGraph) {
                         }
                     })
                 NotificationRoute(notifications)
-            } else IdentityRoute(identity)
-        }
+            } else IdentityRoute(identity, embedded = true)
     }
 }
