@@ -4,7 +4,7 @@
 
 Use two Gradle modules: `app` for Android and `business` for Kotlin/JVM. This split is NexoraPe's architectural decision. The supplied three-page `mobile-arquitecture-guide.pdf` requires bounded contexts, four layers and inward dependencies, but does not prescribe two modules.
 
-The guide's requirements take precedence over example repository layout. The initial foundation scope is preserved as history; the subsequent explicit implementation authorization adds IAM. Other bounded contexts are prepared as separate teammate change packages, not published as Carlos's contributions.
+The guide's requirements take precedence over example repository layout. The foundation scope is preserved as history; IAM is now integrated. This corrective increment recovers Incident Management query/report/location code and tests omitted from documentation-only PR #3. The existing Daniel commit is preserved; new corrective commits use Carlos's explicitly authorized identity and do not fabricate teammate authorship. Incident handling and Notification Management remain in Francisco's separate package pending this correction's integration.
 
 The JVM module prevents accidental compilation against Android's SDK through the Android module. It keeps business concepts independent of screens, storage and transport. Gradle declares only `app` → `business`; `business` has no Android, Compose, Retrofit, Room or DI framework dependencies. This boundary still needs code review when new dependencies and imports are introduced; it does not automatically enforce every future context boundary.
 
@@ -18,7 +18,7 @@ Contexts belong immediately below `com.nexorape.safework` in both modules. The G
 | `com.nexorape.safework.incidentmanagement` | Incident reporting, querying and handling, including Assignment | `domain`, `application` | `presentation`, `infrastructure` |
 | `com.nexorape.safework.notificationmanagement` | User notifications | `domain`, `application` | `presentation`, `infrastructure` |
 
-Context layout (IAM is implemented; Incident/Notification packages are separate upcoming integrations):
+Context layout (IAM and Incident query/report/location are implemented here; Incident handling and Notification packages remain upcoming integrations):
 
 ```text
 business/src/main/kotlin/com/nexorape/safework/
@@ -36,7 +36,9 @@ app/src/main/java/com/nexorape/safework/
 
 IAM now contains validated identity value objects, Domain repository interfaces, Application use cases, HTTP DTO-to-domain mapping, Keystore session storage and a Compose/ViewModel presentation. `business` still has no Android/transport dependency. No empty folders or fabricated feature classes are used.
 
-`MainActivity` hosts IAM navigation. `SafeWorkApplication` owns one application-scoped composition graph so configuration changes do not create inconsistent session stores. `core/designsystem`, `core/network` and `core/configuration` are technical shared concerns, not business contexts. Network DTOs, bearer credentials and encrypted preferences remain outside Domain/Application. Session invalidation prevents late protected responses from restoring a signed-out UI.
+`MainActivity` hosts shared profile/incident navigation. `SafeWorkApplication` owns one application-scoped composition graph so configuration changes do not create inconsistent session stores. `core/designsystem`, `core/network`, `core/configuration` and `core/navigation` are technical shared concerns, not business contexts. Network DTOs, bearer credentials and encrypted preferences remain outside Domain/Application. Session invalidation prevents late protected responses from restoring a signed-out UI.
+
+Incident Domain defines one model, identifiers, status and validated title/description/location; Application orchestrates current-company queries/reporting and an abstract location provider. Android Infrastructure maps the ten-field incident DTO and implements one-shot foreground location. Presentation owns immutable state, Compose forms and runtime permission requests. Location remains editable text; hardware is optional, and no background tracking or structured coordinate API fields are introduced. Assignment remains part of this same context for Francisco's later integration. Existing IAM source, encrypted session storage and its physical-validation report are retained; those prior physical results do not validate the new incident/GPS UI.
 
 ## Four layers across the modules
 
