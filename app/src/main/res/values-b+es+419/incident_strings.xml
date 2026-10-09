@@ -1,0 +1,26 @@
+<resources>
+    <string name="incidents_title">Incidentes</string>
+    <string name="incidents_empty">No hay incidentes en tu empresa.</string>
+    <string name="incident_report">Reportar incidente</string>
+    <string name="incident_title">Título</string>
+    <string name="incident_description">Descripción</string>
+    <string name="incident_location">Ubicación</string>
+    <string name="incident_limits">Título: de 1 a 120 caracteres. Descripción: de 1 a 4000. Ubicación: de 1 a 500.</string>
+    <string name="incident_location_help">Escribe la ubicación o agrega las coordenadas actuales de forma opcional. Puedes editar el texto antes de enviarlo.</string>
+    <string name="incident_location_unavailable">Ubicación no disponible o permiso denegado. Escríbela manualmente o vuelve a intentarlo.</string>
+    <string name="incident_capture_location">Agregar coordenadas actuales</string>
+    <string name="incident_submit">Enviar reporte</string>
+    <string name="incident_reported">Incidente reportado.</string>
+    <string name="incident_reporter">Reportado por: %1$s</string>
+    <string name="incident_responsible">Responsable: %1$s</string>
+    <string name="incident_unassigned">Sin asignar</string>
+    <string name="incident_open">Abierto</string>
+    <string name="incident_assigned">Asignado</string>
+    <string name="incident_in_progress">En atención</string>
+    <string name="incident_closed">Cerrado</string>
+    <string name="incident_back">Volver a incidentes</string>
+    <string name="incident_refresh">Actualizar</string>
+    <string name="incident_error_input">Revisa los límites del título, la descripción y la ubicación.</string>
+    <string name="incident_error_conflict">El incidente cambió o la transición no está disponible. Actualiza antes de volver a intentarlo.</string>
+    <string name="incident_error_not_found">Este incidente no está disponible para tu cuenta.</string>
+</resources>

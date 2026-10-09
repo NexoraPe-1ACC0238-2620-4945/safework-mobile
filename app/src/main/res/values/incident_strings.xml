@@ -1,0 +1,26 @@
+<resources>
+    <string name="incidents_title">Incidents</string>
+    <string name="incidents_empty">No incidents in your company.</string>
+    <string name="incident_report">Report incident</string>
+    <string name="incident_title">Title</string>
+    <string name="incident_description">Description</string>
+    <string name="incident_location">Location</string>
+    <string name="incident_limits">Title: 1–120 characters. Description: 1–4000. Location: 1–500.</string>
+    <string name="incident_location_help">Enter a location manually, or optionally add current coordinates. You can edit the text before submitting.</string>
+    <string name="incident_location_unavailable">Location unavailable or permission denied. Enter it manually or try again.</string>
+    <string name="incident_capture_location">Add current coordinates</string>
+    <string name="incident_submit">Submit report</string>
+    <string name="incident_reported">Incident reported.</string>
+    <string name="incident_reporter">Reported by: %1$s</string>
+    <string name="incident_responsible">Responsible: %1$s</string>
+    <string name="incident_unassigned">Unassigned</string>
+    <string name="incident_open">Open</string>
+    <string name="incident_assigned">Assigned</string>
+    <string name="incident_in_progress">In progress</string>
+    <string name="incident_closed">Closed</string>
+    <string name="incident_back">Back to incidents</string>
+    <string name="incident_refresh">Refresh</string>
+    <string name="incident_error_input">Check the title, description and location limits.</string>
+    <string name="incident_error_conflict">The incident changed or this transition is unavailable. Refresh before trying again.</string>
+    <string name="incident_error_not_found">This incident is unavailable to your account.</string>
+</resources>
