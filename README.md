@@ -11,7 +11,7 @@ The app implements IAM: login, invitation-based WORKER registration, own profile
 - Dependency direction: `app` → `business`.
 - Base package/application ID: `com.nexorape.safework`; Android 8.0/API26 minimum, compile/target35, JDK17.
 
-There are no Android ADMIN functions, refresh tokens, incident/notification/GPS features in this branch. This is **not the complete TB1 delivery**. The server foundation is under review, not a deployed API.
+There are no Android ADMIN functions, refresh tokens, incident/notification/GPS features in this branch. This is **not the complete TB1 delivery**. The server foundation is integrated into backend main/test and runs locally for validation; no deployed API is supplied. Mobile IAM PR #2 remains unmerged.
 
 ## Documentation
 
@@ -20,6 +20,7 @@ There are no Android ADMIN functions, refresh tokens, incident/notification/GPS 
 - [Current and historical backend contract review](docs/backend-contract-review.md)
 - [Foundation verification record](docs/verification.md)
 - [IAM implementation, configuration and verification](docs/iam-implementation.md)
+- [IAM physical-device validation and remaining checks](docs/iam-device-validation.md)
 - [Mobile API contract](docs/mobile-api-contract.md)
 
 Documentation and default UI resources use English. Latin American Spanish uses `values-b+es+419`. Supported locale tags are `en-US` and `es-419`; the SafeWork brand name is not translated. Android selects resources from the device/app locale and falls back to English. No custom language-selection flow is implemented.
@@ -92,4 +93,4 @@ chore(android): initialize project foundation
 
 Before committing, review `git status`, `git diff`, untracked files, `git config user.name` and `git config user.email`. Each contributor reviews, implements and validates their own work and commits with their own Git identity. Do not fabricate contributions or change authors to create evidence.
 
-The Android foundation is already integrated in `main`, and mobile `test` exists. IAM targets `test`; validation in `test` precedes a PR to `main`. The separate backend foundation still targets its own `main` and will get a backend `test` only after review/integration. Existing branches are preserved; no automatic merge is performed.
+The Android foundation is already integrated in `main`, and mobile `test` exists. IAM targets `test`; validation in `test` precedes a PR to `main`. The separate backend foundation is integrated, and its `main`/`test` share commit `08b07675720d378db7a552c44d493f9c386d8375`. Existing branches are preserved; no automatic merge is performed.

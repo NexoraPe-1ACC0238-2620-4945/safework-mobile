@@ -4,20 +4,20 @@
 
 ## Evidence and scope
 
-- [Current-course backend](https://github.com/NexoraPe-1ACC0238-2620-4945/safework-backend): main was initialized with README and .gitignore at `3bdeee9d941ab12b9b9746ff4331e13ef3ece94f`. Corrected source is published on feature/backend-foundation at `00a05cec8339e91c1422c7249ceeafa10d5d7079`, in [backend PR #1](https://github.com/NexoraPe-1ACC0238-2620-4945/safework-backend/pull/1) to main; not merged or deployed. There is no deployed runtime base URL.
+- [Current-course backend](https://github.com/NexoraPe-1ACC0238-2620-4945/safework-backend): corrected foundation `00a05cec8339e91c1422c7249ceeafa10d5d7079` was integrated through [backend PR #1](https://github.com/NexoraPe-1ACC0238-2620-4945/safework-backend/pull/1). Backend local/remote main and test now share merge commit `08b07675720d378db7a552c44d493f9c386d8375`, with the identical validated Git tree. The integrated local runtime is available for the authorized USB device test; there is no deployed runtime base URL.
 - [Historical backend](https://github.com/NexoraPe-1ASI0732/backend-safework), pinned [snapshot](https://github.com/NexoraPe-1ASI0732/backend-safework/commit/778fe1ec8e999b27e8d0340eb26fef50d1a49683): use the existing [historical audit](backend-contract-review.md), especially its [DTO inventory](backend-contract-review.md#3-implemented-historical-dtos), [routes](backend-contract-review.md#4-implemented-historical-routes) and [evidenced problems](backend-contract-review.md#7-problems-evidenced-in-historical-code). This document does not repeat that code audit.
 - Originally prepared on `feature/mobile-api-contract` from updated `test` at `3f6fa5519cb60798063fdce496a658458b23b8ad`. Its existing contents are preserved while the separately authorized backend implementation proceeds. The preserved draft is carried into feature/iam. Android IAM integration uses the explicitly configured validated current-course local runtime; mobile execution evidence is recorded separately.
 - All IDs, people, addresses, timestamps and token/password/invitation strings below are **synthetic fixtures**. Placeholder tokens are deliberately invalid. No example specifies a deployment host; relative routes are not a configured Android API URL.
 
 ### Validated current-course backend checkpoint
 
-The foundation is implemented and locally validated; publication is a PR to main, not a deployment. Its backend docs/verification.md records the source/test revision and actual Maven, MySQL, HTTP, restart and bootstrap results. Android IAM is implemented and locally tested on feature/iam; its separate [implementation report](iam-implementation.md) identifies executable revisions and mobile results. Teammate packages are prepared separately.
+The foundation is implemented, locally validated and integrated into backend main/test, without deployment. Its backend docs/verification.md records the source/test revision and actual Maven, MySQL, HTTP, restart and bootstrap results. Android IAM is implemented and locally tested on feature/iam; its separate [implementation report](iam-implementation.md) identifies executable revisions and mobile results, and the [physical-device report](iam-device-validation.md) distinguishes observed phone behavior from helper requests and pending checks. Mobile PR #2 remains separate from test. Teammate packages are prepared separately.
 
 The current implementation retains historical success DTO fields and adds invitationToken for WORKER-only signup. Proofs are company/email-bound, opaque, single-use and expire after 24 hours. Own-company EMPLOYER or backend-only ADMIN can issue them. ADMIN-only role/company/enablement changes revoke all target sessions and audit in the same transaction.
 
 JWT uses HS512, issuer safework-backend, audience safework-mobile and required sub/userId/companyId/jti/iat/exp. jti is a persisted session UUID; lifetime defaults to seven days, configurable by JWT_EXPIRATION (1-365 days). No refresh exists. Every protected request checks an active, unexpired session and current account/company/roles/security version; writes recheck transactionally. No raw JWT is stored by the server.
 
-POST /api/v1/authentication/sign-out now revokes only the presented session. Invalid sessions401; valid sessions without required permission403. Actual packaged-server restarts verified persistent revocation and surviving independent sessions. This is new corrected behavior, absent historically. No deployed API URL is supplied; authorized local integration may use the validated current-course commit while its PR is under review, with no historical fallback.
+POST /api/v1/authentication/sign-out now revokes only the presented session. Invalid sessions401; valid sessions without required permission403. Actual packaged-server restarts verified persistent revocation and surviving independent sessions. This is new corrected behavior, absent historically. No deployed API URL is supplied; authorized local integration uses the integrated current-course backend and existing synthetic database, with no historical fallback.
 
 ### Compatibility labels
 
@@ -607,7 +607,7 @@ These directions are implemented where noted. Follow-up work is separate from ve
 | D7 | Zone-aware ISO-8601, uniform errors and explicit limits above | Implemented limits, code-point/UTF-8 byte checks, zoned dates and errors. Pagination/filter/phone clearing deferred. |
 | D8 | location string from manual or GPS-composed text | Implemented bounded text. Android GPS permission/manual UX is later; no coordinate DTO. |
 
-Optional assignmentId/assigneeUserId remain **proposals pending server implementation/specification**, excluded from required responses. Current-course source and generated OpenAPI have local passing evidence and a published foundation PR; no deployed environment is available. Authorized local integration uses the pinned validated revision while review is pending.
+Optional assignmentId/assigneeUserId remain **proposals pending server implementation/specification**, excluded from required responses. Current-course source and generated OpenAPI have local passing evidence and the foundation is integrated into backend main/test; no deployed environment is available. Authorized local integration uses the pinned integrated revision with the identical validated tree.
 
 Mandatory outcomes: no public privilege grant or arbitrary company affiliation; company authorization on list/detail/commands; responsible-only start/close; no recipient leaks; no token logs or usable signing-key code fallback.
 
@@ -670,15 +670,15 @@ Apply the existing [architecture decision](architecture.md): context packages di
 
 The current-course generated OpenAPI, backend API contract and verification report distinguish retained DTOs, approved implemented session behavior and actual results. The historical audit and original draft are preserved. Synthetic examples remain deliberately invalid placeholders.
 
-The preserved contract moved from feature/mobile-api-contract into feature/iam after updated test. Mobile business/HTTP/ViewModel tests, real local IAM checks, build and lint are recorded in [IAM verification](iam-implementation.md). Physical IAM flows/Keystore checks remain pending because no device is connected. Backend and mobile have separate PRs; neither is automatically merged or deployed.
+The preserved contract moved from feature/mobile-api-contract into feature/iam after updated test. Mobile business/HTTP/ViewModel tests, real local IAM checks, build and lint are recorded in [IAM verification](iam-implementation.md). The connected Android10/API29 guided test is recorded in [physical-device validation](iam-device-validation.md), with observed results and remaining scope distinguished. Backend PR #1 was merged by the user; mobile PR #2 remains unmerged. No automatic merge or deployment is performed.
 
 ## Integration dependencies and backend-owner follow-up
 
-1. Publish/review the foundation PR and share its source/OpenAPI revision. Main initialization is not the API; authorized local integration may use the validated current-course commit while review is pending.
+1. Backend foundation publication/review/integration is complete at `08b07675720d378db7a552c44d493f9c386d8375`; main/test share the same validated tree. Share that source/OpenAPI revision for integration. Review/integration of the separate mobile IAM PR remains pending.
 2. Configure an explicit test API URL. Published environments require HTTPS, private signing keys and reviewed schema migrations. No automatic deployment or historical fallback.
 3. Provision the initial operator privately; issue validated invitations and grant EMPLOYER through audited ADMIN routes. No public role/company selection or Android ADMIN functionality.
 4. Keep approved jti sessions and sign-out; retain regression coverage for independent sessions, selective logout, administrative revocation, restart persistence, altered/expired/unknown tokens and unrelated users.
 5. Resolve outstanding responsibilities after role removal/transfer/disablement operationally. Transfers do not move business records or enable reassignment/manager override.
 6. Plan expired-session retention/cleanup, key rotation and coordinated deployment rate limits. Local revocation/logout is already implemented.
-7. Carlos's IAM implementation/verifications use the pinned local backend, with physical checks pending. Daniel/Francisco integrate the separate isolated packages against the [shared contracts](team-integration-contracts.md).
+7. Carlos's IAM implementation/verifications use the pinned local backend; the [device report](iam-device-validation.md) records the guided physical checks and remaining scope. Daniel/Francisco integrate the separate isolated packages against the [shared contracts](team-integration-contracts.md).
 8. Mark-read/push, pagination/filter, phone clearing and optional assignmentId/assigneeUserId remain deferred, unimplemented proposals rather than integration blockers for this increment.
