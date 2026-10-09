@@ -4,14 +4,14 @@ Native Android application for SafeWork, by NexoraPe. UPC course 1ACC0238, acade
 
 ## Current scope
 
-The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. Incident Management now adds current-company list/detail/reporting and editable manual location with optional one-shot device coordinates. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
+The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. Incident Management supports current-company list/detail/reporting, editable manual location with optional one-shot device coordinates, responsible self-assignment and start/close lifecycle actions. Notification Management adds the current authenticated recipient's notifications. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
 
 - `app`: Android, Compose Presentation and HTTP/secure-storage Infrastructure.
 - `business`: pure Kotlin Domain/Application, identity value objects, repository contracts and use cases.
 - Dependency direction: `app` → `business`.
 - Base package/application ID: `com.nexorape.safework`; Android 8.0/API26 minimum, compile/target35, JDK17.
 
-Android ADMIN functions, refresh tokens, incident assignment/start/close and notifications are not included. This is **not the complete TB1 delivery**. The server foundation is integrated into backend main/test and runs locally for validation; no deployed API is supplied. Mobile IAM PR #2 is integrated into test. This corrective incident branch recovers the prepared code/tests omitted from documentation-only PR #3; physical incident/GPS checks remain pending.
+Android ADMIN functions, refresh tokens, reassignment, push notifications and mark-as-read are not included. This is **not the complete TB1 delivery**. The server foundation runs locally for validation; no deployed API is supplied. The IAM and Daniel incident query/reporting prerequisites are retained from `test`. Francisco's handling and notification source/test package is now integrated in this archive. Physical handling/notification checks and the combined build remain pending validation.
 
 ## Documentation
 
@@ -22,6 +22,8 @@ Android ADMIN functions, refresh tokens, incident assignment/start/close and not
 - [IAM implementation, configuration and verification](docs/iam-implementation.md)
 - [IAM physical-device validation and remaining checks](docs/iam-device-validation.md)
 - [Incident query/reporting correction, inventory and actual verification](docs/incident-query-reporting.md)
+- [Incident handling and recipient notifications](docs/incident-handling-notifications.md)
+- [Francisco integration instructions and validation status](docs/francisco-integration-on-test.md)
 - [Mobile API contract](docs/mobile-api-contract.md)
 
 Documentation and default UI resources use English. Latin American Spanish uses `values-b+es+419`. Supported locale tags are `en-US` and `es-419`; the SafeWork brand name is not translated. Android selects resources from the device/app locale and falls back to English. No custom language-selection flow is implemented.
@@ -84,7 +86,7 @@ Registration needs an invitation issued outside the mobile app by a permitted se
 3. Features: `feature/...` → PR to `test`.
 4. Validation in `test` → PR to `main`.
 
-Planned feature branches are `feature/iam`, `feature/incident-query`, `feature/incident-reporting`, `feature/incident-management`, `feature/notifications` and `feature/device-location`. Branch names describe work allocation; they do not define bounded contexts. Assignment belongs to Incident Management.
+Planned feature areas have included `feature/iam`, `feature/incident-query`, `feature/incident-reporting`, `feature/incident-management`, `feature/notifications` and `feature/device-location`. **For this Francisco delivery, the requested combined branch is `feature/incident-handling-notifications`, based on updated `origin/test`, with the PR targeted to `test`.** Branch names describe work allocation; they do not define bounded contexts. Assignment belongs to Incident Management.
 
 Use Conventional Commits. The proposed foundation commit is:
 

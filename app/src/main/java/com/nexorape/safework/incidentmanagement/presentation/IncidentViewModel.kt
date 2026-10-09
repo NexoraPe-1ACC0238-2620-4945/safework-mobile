@@ -25,10 +25,11 @@ class IncidentViewModel(private val cases: IncidentUseCases, actor: UserProfile,
     private var locationJob: Job? = null
     private var identity: UserProfile? = actor
     private var generation = 0
+    private var pendingDetail: IncidentId? = null
     init {
         viewModelScope.launch {
             invalidations.drop(1).collect {
-                generation++; identity = null; cancelLocation()
+                generation++; identity = null; pendingDetail = null; cancelLocation()
                 mutable.value = IncidentUiState(error = IncidentFailure.SESSION_INVALID)
             }
         }
@@ -38,8 +39,12 @@ class IncidentViewModel(private val cases: IncidentUseCases, actor: UserProfile,
         val items = cases.list(it)
         state.value.copy(items = items, page = IncidentPage.LIST, selected = null, error = null)
     }
-    fun detail(id: IncidentId) = runAction {
-        state.value.copy(selected = cases.detail(id, it), page = IncidentPage.DETAIL)
+    fun detail(id: IncidentId) {
+        if (state.value.busy) {
+            if (state.value.page == IncidentPage.DETAIL && state.value.selected?.id == id) pendingDetail = id
+            return
+        }
+        runAction { state.value.copy(selected = cases.detail(id, it), page = IncidentPage.DETAIL) }
     }
     fun openReport() {
         if (state.value.busy) return
@@ -87,7 +92,13 @@ class IncidentViewModel(private val cases: IncidentUseCases, actor: UserProfile,
             try { val result = action(actor); if (generation == startedGeneration) mutable.value = result }
             catch (e: CancellationException) { throw e }
             catch (e: IncidentException) { if (generation == startedGeneration) mutable.value = state.value.copy(error = e.reason) }
-            finally { mutable.value = state.value.copy(busy = false) }
+            finally {
+                mutable.value = state.value.copy(busy = false)
+                val queued = pendingDetail
+                pendingDetail = null
+                if (queued != null && generation == startedGeneration && state.value.page == IncidentPage.DETAIL && state.value.selected?.id == queued)
+                    detail(queued)
+            }
         }
     }
 }

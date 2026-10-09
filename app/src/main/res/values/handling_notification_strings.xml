@@ -1,0 +1,11 @@
+<resources>
+    <string name="handling_take">Take responsibility</string>
+    <string name="handling_start">Start incident</string>
+    <string name="handling_close">Close incident</string>
+    <string name="handling_close_confirmation">Confirm the incident is resolved. A closed incident cannot be reopened in this version.</string>
+    <string name="handling_other_responsible">Only the assigned responsible employer can start or close this incident.</string>
+    <string name="handling_assigned_at">Assigned: %1$s</string>
+    <string name="handling_closed_at">Completed: %1$s</string>
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_empty">No notifications for your account.</string>
+</resources>

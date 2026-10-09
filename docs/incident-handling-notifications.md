@@ -1,0 +1,29 @@
+# Incident handling and current-user notifications
+
+**Integration note (8 October 2026):** This archive already contains the Francisco package applied to the supplied `safework-mobile-test.zip`, with Daniel's existing code preserved. Do **not** apply Daniel's patch or Francisco's patch to the already-integrated folder. The original provenance and results below describe a prior development environment; they are not fresh test results from this ZIP. See [integration status](francisco-integration-on-test.md).
+
+Francisco integration package, centrally prepared with Carlos/Codex on an isolated worktree. Base IAM SHA: `060817fa723c52534eba0aae10973ad6dff8c527`. Apply Daniel's validated prerequisite patch first: SHA-256 `fef3f560b641b54e2fba8d642f26a9e373d5ef4d7ed8ae8841f352111f17fbec`. No Francisco-authored commit or package publication by Carlos is claimed. Recipients incorporate/review/validate and commit with their own identities.
+
+## Behavior and shared contracts
+
+IncidentManagement remains one bounded context and reuses Daniel's Incident entity/IDs/VOs/state/DTO mapper. Assignment belongs here, with its positive ID, incidentId, responsible userId, title, shared incident status, zoned assignedAt, priority and nullable persisted completionDate. Separate query/report and handling repository ports serve one model, not duplicate contexts. Domain/Application are pure Kotlin; Android DTO mapping/Presentation remain in app. See [shared contracts](team-integration-contracts.md).
+
+EMPLOYER takes an OPEN incident by sending only incidentId. The returned/own assignment's userId establishes responsibility; display names, including identical names, are never compared to authorize. Same-company responsible-only transitions use ASSIGNED -> IN_PROGRESS -> CLOSED and no action body. Closing asks for confirmation; no reopening, reassignment, selected-responsible input or ADMIN business UI. Local checks guide UX and reject inconsistent DTOs; the server independently authorizes company, role, responsible and state. Parent detail refreshes are queued when another refresh is already active, preventing a mutation's refresh from being silently dropped. Pending handling loads/mutations and cached responsibility are cleared on leaving/invalidation.
+
+NotificationManagement is separate and queries only `/notifications/my-notifications` with the shared authenticated session. Map UUID/subject/body/zoned createdAt/isRead, newest first. No recipient selector, read marking, unread badge, push or invented incident link/ID: the DTO supplies no incident reference. Dates are absolute Instants, formatted with reactive app locale and the device's explicitly displayed zone.
+
+Retained server event policy: creation addresses the reporter; assignment addresses the taking responsible; start/close address the acting responsible. Expanding delivery to the reporter/company is a pending business decision, not an implemented mobile promise. isRead=false remains the documented server placeholder and does not prove read-state tracking.
+
+Session401 clears shared credentials and cached notification/assignment state;403 preserves a valid session. Generation/cancellation guards discard late results after logout or leaving a detail. No token/body/header logging, duplicate session storage, historical fallback or new deployment endpoint.
+
+## Previously reported verification (different development environment)
+
+Against local current-course backend `00a05cec8339e91c1422c7249ceeafa10d5d7079` and synthetic MySQL data: **31 tests, failures0/errors0/skips0** (21 inherited IAM/Daniel and10 new Assignment/HTTP/ViewModel/real handling-notification checks). **91 recorded live HTTP requests**:20 IAM,20 query/reporting,51 new setup/handling/notification requests. The latter include25 status200,11 status201,4 status403,3 status409,3 status404 and5 logout204.
+
+New actual HTTP outcomes: WORKER taking/start403; EMPLOYER self-take201; another same-company EMPLOYER repeat take409 and start/close403; foreign company detail/start/close404; premature/repeated close409; responsible start/close200; persisted completion timestamp200; notification queries200 deliver reporter1, responsible3 and other/foreign0 with disjoint IDs. All test participants intentionally have the same display name; responsibility is validated through IDs. Rejections preserve the lifecycle, and no extra notifications are produced by rejected operations in this fixture.
+
+The first live test incorrectly expected status notices to the reporter; existing audit/code evidence required actor-recipient expectations, then all tests passed. Lint detected a non-reactive locale read; it was corrected to LocalConfiguration. Final debug/release build and lint: BUILD SUCCESSFUL, exit0, **0 errors/9 warnings**. This locale-only adjustment did not change already-executed HTTP/business tests. Remaining version/API/KTX notices, inherited legacy LocationListener and nullable Java fixture-type compiler warnings are disclosed; no baseline hides them.
+
+Pending: no connected device, so actual Compose/navigation/dialog/locale/time-zone/accessibility interaction, secure-storage behavior, physical GPS/permissions and minimum/newer Android coverage are not executed. Test location fixes/coordinates are synthetic. Release is unsigned; production endpoint/TLS/signing/deployment/migrations, pagination, read tracking/push and expanded notification recipients remain future work.
+
+Rerun commands/opt-in fixture configuration in [IAM verification](iam-implementation.md), keeping fixture credentials private and using `--no-daemon`. If not configured, three live tests are skipped and cannot be claimed as executed. Review both prerequisite and this patch before own Conventional Commits/PR to `test`. No automatic merge, deployment or identity changes.
