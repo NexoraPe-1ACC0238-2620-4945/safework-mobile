@@ -11,7 +11,7 @@ The app implements IAM: login, invitation-based WORKER registration, own profile
 - Dependency direction: `app` → `business`.
 - Base package/application ID: `com.nexorape.safework`; Android 8.0/API26 minimum, compile/target35, JDK17.
 
-Android ADMIN functions, refresh tokens, reassignment, push notifications and mark-as-read are not included. This is **not the complete TB1 delivery**. The server foundation runs locally for validation; no deployed API is supplied. The IAM and Daniel incident query/reporting prerequisites are retained from `test`. Francisco's handling and notification source/test package is now integrated in this archive. Physical handling/notification checks and the combined build remain pending validation.
+Android ADMIN functions, refresh tokens, reassignment, push notifications and mark-as-read are not included. This is **not the complete TB1 delivery**. The corrected current-course backend runs locally for validation; no deployed API is supplied. The IAM and Daniel prerequisites are retained from `test`. PR #5 adds Francisco's incident handling and notifications, plus a follow-up fix that prevents a failed notification query from displaying a false empty state. Corrected-code verification passed 31 tests without failures or skips, including three real local integrations (91 HTTP requests), debug/unsigned-release builds and lint (0 errors / 9 existing warnings). Physical take/start/confirmed-close/notification consultation, cancellation, reopening and simulated 503 recovery were checked. Full TalkBack, broader large-text/device coverage and negative physical UI checks remain pending. See the validation records below.
 
 ## Documentation
 
@@ -23,7 +23,8 @@ Android ADMIN functions, refresh tokens, reassignment, push notifications and ma
 - [IAM physical-device validation and remaining checks](docs/iam-device-validation.md)
 - [Incident query/reporting correction, inventory and actual verification](docs/incident-query-reporting.md)
 - [Incident handling and recipient notifications](docs/incident-handling-notifications.md)
-- [Francisco integration instructions and validation status](docs/francisco-integration-on-test.md)
+- [Francisco integration and automated validation](docs/francisco-integration-on-test.md)
+- [Francisco physical-device checks and remaining limitations](docs/francisco-device-validation.md)
 - [Mobile API contract](docs/mobile-api-contract.md)
 
 Documentation and default UI resources use English. Latin American Spanish uses `values-b+es+419`. Supported locale tags are `en-US` and `es-419`; the SafeWork brand name is not translated. Android selects resources from the device/app locale and falls back to English. No custom language-selection flow is implemented.
