@@ -1,0 +1,13 @@
+<resources>
+    <string name="design_brand_caption">Seguridad en el trabajo</string>
+    <string name="design_loading">Espera un momento…</string>
+    <string name="design_show_password">Mostrar contraseña</string>
+    <string name="design_hide_password">Ocultar contraseña</string>
+    <string name="design_password_visible">Contraseña visible</string>
+    <string name="design_password_hidden">Contraseña oculta</string>
+    <string name="design_nav_profile">Perfil</string>
+    <string name="design_notifications_caption">Novedades sobre tus reportes y responsabilidades.</string>
+    <string name="design_notifications_empty_caption">La actividad de los incidentes aparecerá aquí cuando el servidor te envíe una novedad.</string>
+    <string name="design_incidents_caption">Reporta un riesgo y sigue los incidentes de tu empresa.</string>
+    <string name="design_nav_notifications">Avisos</string>
+</resources>

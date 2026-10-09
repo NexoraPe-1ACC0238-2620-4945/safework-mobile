@@ -1,4 +1,12 @@
 <resources>
+    <string name="iam_login_heading">Inicia sesión en SafeWork</string>
+    <string name="iam_login_subtitle">Inicia sesión en tu cuenta de empresa.</string>
+    <string name="iam_register_heading">Únete a tu equipo</string>
+    <string name="iam_register_subtitle">Crea tu cuenta con una invitación de empresa.</string>
+    <string name="iam_profile_subtitle">Los datos de tu cuenta y tu empresa.</string>
+    <string name="iam_edit_subtitle">Mantén tus datos de contacto actualizados.</string>
+    <string name="iam_workplace_heading">Tu empresa</string>
+    <string name="iam_phone_label">Teléfono</string>
     <string name="iam_login">Iniciar sesión</string>
     <string name="iam_email">Correo electrónico</string>
     <string name="iam_password">Contraseña</string>
@@ -12,7 +20,6 @@
     <string name="iam_profile">Mi perfil</string>
     <string name="iam_company">ID de empresa: %1$d</string>
     <string name="iam_roles">Roles: %1$s</string>
-    <string name="iam_phone_display">Teléfono: %1$s</string>
     <string name="iam_not_provided">Sin registrar</string>
     <string name="iam_edit_profile">Editar perfil</string>
     <string name="iam_refresh_profile">Actualizar perfil</string>

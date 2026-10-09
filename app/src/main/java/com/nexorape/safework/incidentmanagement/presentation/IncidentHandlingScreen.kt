@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nexorape.safework.core.designsystem.components.*
 import com.nexorape.safework.R
 import com.nexorape.safework.core.presentation.localTimestamp
 import com.nexorape.safework.incidentmanagement.domain.model.*
@@ -19,19 +20,19 @@ fun IncidentHandlingRoute(viewModel: IncidentHandlingViewModel, incident: Incide
     var confirmClose by remember(incident.id) { mutableStateOf(false) }
     val busy = externalBusy || state.busy
     val current = state.incident ?: incident
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (state.busy) SafeWorkLoading()
         state.error?.let {
-            Text(stringResource(incidentError(it)), color = MaterialTheme.colorScheme.error)
+            SafeWorkMessage(stringResource(incidentError(it)), error = true)
             TextButton(onClick = { viewModel.observe(incident) }, enabled = !busy) { Text(stringResource(R.string.incident_refresh)) }
         }
         when {
             current.status == IncidentStatus.OPEN && state.assignment == null ->
-                Button(onClick = { viewModel.take(changed) }, enabled = !busy && state.error == null) { Text(stringResource(R.string.handling_take)) }
+                SafeWorkPrimaryButton(stringResource(R.string.handling_take), { viewModel.take(changed) }, !busy && state.error == null, SafeWorkIcons.Person)
             current.status == IncidentStatus.ASSIGNED && state.assignment != null ->
-                Button(onClick = { viewModel.start(changed) }, enabled = !busy && state.error == null) { Text(stringResource(R.string.handling_start)) }
+                SafeWorkPrimaryButton(stringResource(R.string.handling_start), { viewModel.start(changed) }, !busy && state.error == null)
             current.status == IncidentStatus.IN_PROGRESS && state.assignment != null ->
-                Button(onClick = { confirmClose = true }, enabled = !busy && state.error == null) { Text(stringResource(R.string.handling_close)) }
+                SafeWorkPrimaryButton(stringResource(R.string.handling_close), { confirmClose = true }, !busy && state.error == null, SafeWorkIcons.Check)
             current.status != IncidentStatus.CLOSED && !busy -> Text(stringResource(R.string.handling_other_responsible))
         }
         state.assignment?.let { assignment ->
