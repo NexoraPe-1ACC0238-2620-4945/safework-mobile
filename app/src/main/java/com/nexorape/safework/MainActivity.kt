@@ -4,70 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.nexorape.safework.core.designsystem.theme.SafeWorkTheme
+import com.nexorape.safework.iam.presentation.IdentityRoute
+import com.nexorape.safework.iam.presentation.IdentityViewModel
 
 class MainActivity : ComponentActivity() {
+    private val graph get() = (application as SafeWorkApplication).graph
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            SafeWorkTheme {
-                SafeWorkScreen()
+        val identity = ViewModelProvider(this, object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                require(modelClass == IdentityViewModel::class.java)
+                @Suppress("UNCHECKED_CAST")
+                return IdentityViewModel(graph.identity, graph.sessions.invalidations) as T
             }
-        }
-    }
-}
-
-@Composable
-private fun SafeWorkScreen() {
-    Surface(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxSize().safeDrawingPadding().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
-        ) {
-            Text(
-                text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(R.string.welcome_message),
-                style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
-            )
-        }
-    }
-}
-
-@Preview(name = "English - light", showBackground = true, locale = "en-rUS")
-@Preview(name = "Latin American Spanish - light", showBackground = true, locale = "es-rPE")
-@Composable
-private fun SafeWorkScreenPreview() {
-    SafeWorkTheme(darkTheme = false) {
-        SafeWorkScreen()
-    }
-}
-
-@Preview(name = "English - dark", showBackground = true)
-@Composable
-private fun SafeWorkScreenDarkPreview() {
-    SafeWorkTheme(darkTheme = true) {
-        SafeWorkScreen()
+        })[IdentityViewModel::class.java]
+        setContent { SafeWorkTheme { IdentityRoute(identity) } }
     }
 }
