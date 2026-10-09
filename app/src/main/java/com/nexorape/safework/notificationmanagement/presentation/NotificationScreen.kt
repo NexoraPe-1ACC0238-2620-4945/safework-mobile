@@ -21,7 +21,7 @@ fun NotificationRoute(viewModel: NotificationViewModel) {
         if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         state.error?.let { Text(stringResource(notificationError(it)), color = MaterialTheme.colorScheme.error) }
         OutlinedButton(onClick = viewModel::refresh, enabled = !state.busy) { Text(stringResource(R.string.incident_refresh)) }
-        if (state.items.isEmpty() && !state.busy) Text(stringResource(R.string.notifications_empty))
+        if (state.items.isEmpty() && !state.busy && state.error == null) Text(stringResource(R.string.notifications_empty))
         state.items.forEach { notification ->
             OutlinedCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
