@@ -4,7 +4,7 @@
 
 Use two Gradle modules: `app` for Android and `business` for Kotlin/JVM. This split is NexoraPe's architectural decision. The supplied three-page `mobile-arquitecture-guide.pdf` requires bounded contexts, four layers and inward dependencies, but does not prescribe two modules.
 
-The guide's requirements take precedence over example repository layout. The current user request limits this work to the Android foundation; later course deliverables and examples do not authorize implementing features now.
+The guide's requirements take precedence over example repository layout. The initial foundation scope is preserved as history; the subsequent explicit implementation authorization adds IAM. Other bounded contexts are prepared as separate teammate change packages, not published as Carlos's contributions.
 
 The JVM module prevents accidental compilation against Android's SDK through the Android module. It keeps business concepts independent of screens, storage and transport. Gradle declares only `app` → `business`; `business` has no Android, Compose, Retrofit, Room or DI framework dependencies. This boundary still needs code review when new dependencies and imports are introduced; it does not automatically enforce every future context boundary.
 
@@ -18,7 +18,7 @@ Contexts belong immediately below `com.nexorape.safework` in both modules. The G
 | `com.nexorape.safework.incidentmanagement` | Incident reporting, querying and handling, including Assignment | `domain`, `application` | `presentation`, `infrastructure` |
 | `com.nexorape.safework.notificationmanagement` | User notifications | `domain`, `application` | `presentation`, `infrastructure` |
 
-Future package layout, shown only as documentation:
+Context layout (IAM is implemented; Incident/Notification packages are separate upcoming integrations):
 
 ```text
 business/src/main/kotlin/com/nexorape/safework/
@@ -34,9 +34,9 @@ app/src/main/java/com/nexorape/safework/
   notificationmanagement/{presentation,infrastructure}/
 ```
 
-Create packages and classes as real use cases arrive. No placeholder entities, repositories, DTOs, ViewModels or feature screens are included. The existing business `package-info.kt` contained only a comment and a generic `...safework.business` package declaration; its contents were inspected and preserved in the ignored pre-review backup before replacement with module documentation.
+IAM now contains validated identity value objects, Domain repository interfaces, Application use cases, HTTP DTO-to-domain mapping, Keystore session storage and a Compose/ViewModel presentation. `business` still has no Android/transport dependency. No empty folders or fabricated feature classes are used.
 
-`MainActivity` is the Android entry point and hosts the static foundation screen. `core/designsystem` is a technical shared concern explicitly allowed by the guide, not a business context. Device location will be an Android capability integrated into actual use cases; its feature branch does not make it an additional business context.
+`MainActivity` hosts IAM navigation. `SafeWorkApplication` owns one application-scoped composition graph so configuration changes do not create inconsistent session stores. `core/designsystem`, `core/network` and `core/configuration` are technical shared concerns, not business contexts. Network DTOs, bearer credentials and encrypted preferences remain outside Domain/Application. Session invalidation prevents late protected responses from restoring a signed-out UI.
 
 ## Four layers across the modules
 
@@ -44,7 +44,7 @@ Create packages and classes as real use cases arrive. No placeholder entities, r
 | --- | --- |
 | Domain (`business`) | Entities/aggregate roots preserve invariants. Immutable value objects validate constrained values. Repository interfaces describe domain operations without storage/HTTP types. Domain depends on no other layer. |
 | Application (`business`) | Use cases orchestrate entities and domain repository interfaces. Use constructor parameters for dependencies. Keep Android, network, storage and framework DI wiring out. |
-| Presentation (`app`) | Compose renders state; future ViewModels invoke Application use cases and expose immutable UI state through a read-only `StateFlow`. UI input validation may guide interaction, but business invariants belong in Domain. |
+| Presentation (`app`) | Compose renders state; ViewModels invoke Application use cases and expose immutable UI state through a read-only `StateFlow`. UI input validation may guide interaction, but business invariants belong in Domain. |
 | Infrastructure (`app`) | Implement Domain interfaces and translate DTO/local models into Domain objects in mappers before returning data to upper layers. Android capabilities, persistence, networking and DI wiring live here or in technical `core` packages. |
 
 Compile-time dependencies point inward: Presentation → Application → Domain, and Infrastructure → Domain (and Application when needed). Composition in `app` supplies concrete implementations to use-case constructors. Neither Domain nor Application can import Presentation or Infrastructure. DTOs and local database entities must not cross the boundary into Presentation/Application/Domain.
@@ -53,7 +53,7 @@ The domain model is not determined by backend DTO shape. Cross-context business 
 
 ## Current visual and language foundation
 
-`SafeWorkTheme` supplies explicit Material 3 light/dark colors. XML window themes and backgrounds follow system appearance during startup; Compose respects safe drawing insets and uses text resources. English is the default, with a Latin American Spanish welcome translation and supported `en-US`/`es-419` locale declarations. Previews aid manual inspection, but are not evidence of successful runtime or accessibility testing.
+`SafeWorkTheme` supplies explicit Material 3 light/dark colors. XML window themes and backgrounds follow system appearance during startup; Compose respects safe drawing insets and uses text resources. English is the default, with a Latin American Spanish welcome translation and supported `en-US`/`es-419` locale declarations. Localized IAM forms use scroll/IME insets and accessible labels; physical-device and accessibility checks require separate execution evidence.
 
 ## Sources
 
