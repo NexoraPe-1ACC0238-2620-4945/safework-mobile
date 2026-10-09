@@ -7,7 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.nexorape.safework.core.designsystem.theme.SafeWorkTheme
-import com.nexorape.safework.iam.presentation.IdentityRoute
+import com.nexorape.safework.core.navigation.SafeWorkNavigation
 import com.nexorape.safework.iam.presentation.IdentityViewModel
 
 class MainActivity : ComponentActivity() {
@@ -22,6 +22,6 @@ class MainActivity : ComponentActivity() {
                 return IdentityViewModel(graph.identity, graph.sessions.invalidations) as T
             }
         })[IdentityViewModel::class.java]
-        setContent { SafeWorkTheme { IdentityRoute(identity) } }
+        setContent { SafeWorkTheme { SafeWorkNavigation(identity, graph) } }
     }
 }

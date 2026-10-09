@@ -4,14 +4,14 @@ Native Android application for SafeWork, by NexoraPe. UPC course 1ACC0238, acade
 
 ## Current scope
 
-The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
+The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. Incident Management now adds current-company list/detail/reporting and editable manual location with optional one-shot device coordinates. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
 
 - `app`: Android, Compose Presentation and HTTP/secure-storage Infrastructure.
 - `business`: pure Kotlin Domain/Application, identity value objects, repository contracts and use cases.
 - Dependency direction: `app` → `business`.
 - Base package/application ID: `com.nexorape.safework`; Android 8.0/API26 minimum, compile/target35, JDK17.
 
-There are no Android ADMIN functions, refresh tokens, incident/notification/GPS features in this branch. This is **not the complete TB1 delivery**. The server foundation is integrated into backend main/test and runs locally for validation; no deployed API is supplied. Mobile IAM PR #2 remains unmerged.
+Android ADMIN functions, refresh tokens, incident assignment/start/close and notifications are not included. This is **not the complete TB1 delivery**. The server foundation is integrated into backend main/test and runs locally for validation; no deployed API is supplied. Mobile IAM PR #2 is integrated into test. This corrective incident branch recovers the prepared code/tests omitted from documentation-only PR #3; physical incident/GPS checks remain pending.
 
 ## Documentation
 
@@ -21,6 +21,7 @@ There are no Android ADMIN functions, refresh tokens, incident/notification/GPS 
 - [Foundation verification record](docs/verification.md)
 - [IAM implementation, configuration and verification](docs/iam-implementation.md)
 - [IAM physical-device validation and remaining checks](docs/iam-device-validation.md)
+- [Incident query/reporting correction, inventory and actual verification](docs/incident-query-reporting.md)
 - [Mobile API contract](docs/mobile-api-contract.md)
 
 Documentation and default UI resources use English. Latin American Spanish uses `values-b+es+419`. Supported locale tags are `en-US` and `es-419`; the SafeWork brand name is not translated. Android selects resources from the device/app locale and falls back to English. No custom language-selection flow is implemented.
