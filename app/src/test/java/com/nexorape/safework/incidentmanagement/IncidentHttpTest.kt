@@ -20,8 +20,10 @@ class IncidentHttpTest {
     private val actor = UserProfile(UserId(1), CompanyId(2), FullName.of("Synthetic Worker"), EmailAddress.of("synthetic@example.test"), null, setOf(Role.WORKER))
     private val json = """{"id":5,"userId":1,"companyId":2,"title":"Synthetic hazard","description":"Synthetic description","location":"Manual location","status":"OPEN","documentUrl":null,"reporterName":"Synthetic Worker","assigneeName":null}"""
     @Before fun setup() {
-        server = MockWebServer().apply { start() }; store = MemorySessions()
-        val api = ApiClient(server.url("/").toString(), true, store)
+        server = MockWebServer().apply {
+            start(java.net.InetAddress.getByName("127.0.0.1"), 0)
+        }; store = MemorySessions()
+        val api = ApiClient(server.url("http://127.0.0.1:${server.port}/").toString(), true, store)
         store.write(SessionCredential("synthetic-invalid-token", api.baseUrl))
         cases = IncidentUseCases(HttpIncidentRepository(api))
     }

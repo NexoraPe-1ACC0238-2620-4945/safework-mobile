@@ -1,0 +1,11 @@
+<resources>
+    <string name="handling_take">Asumir responsabilidad</string>
+    <string name="handling_start">Iniciar incidente</string>
+    <string name="handling_close">Cerrar incidente</string>
+    <string name="handling_close_confirmation">Confirma que el incidente está resuelto. Un incidente cerrado no puede reabrirse en esta versión.</string>
+    <string name="handling_other_responsible">Solo el empleador responsable asignado puede iniciar o cerrar este incidente.</string>
+    <string name="handling_assigned_at">Asignado: %1$s</string>
+    <string name="handling_closed_at">Finalizado: %1$s</string>
+    <string name="notifications_title">Notificaciones</string>
+    <string name="notifications_empty">No hay notificaciones para tu cuenta.</string>
+</resources>

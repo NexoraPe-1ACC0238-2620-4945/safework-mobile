@@ -29,10 +29,13 @@ class IdentityHttpTest {
     private lateinit var api: ApiClient
     private lateinit var useCases: IdentityUseCases
     private val profile = """{"id":1,"companyId":2,"fullName":"Synthetic Worker","email":"synthetic@example.test","phoneNumber":null,"createdAt":"2026-10-08T12:00:00Z","updatedAt":"2026-10-08T12:00:00Z","roles":["WORKER"]}"""
-    @Before fun setup() {
-        server = MockWebServer().apply { start() }
+    @Before
+    fun setup() {
+        server = MockWebServer().apply {
+            start(java.net.InetAddress.getByName("127.0.0.1"), 0)
+        }
         store = MemorySessions()
-        api = ApiClient(server.url("/").toString(), true, store)
+        api = ApiClient("http://127.0.0.1:${server.port}/", true, store)
         useCases = IdentityUseCases(HttpIdentityRepository(api, store))
     }
     @After fun teardown() { server.shutdown() }
@@ -120,7 +123,7 @@ class IdentityHttpTest {
         store.write(SessionCredential("synthetic-invalid-token", "https://different.example.test/"))
         fails(IdentityFailure.SESSION_INVALID) { useCases.profile() }
         assertEquals(0, server.requestCount)
-        assertEquals("", ApiClient(server.url("/").toString(), false, store).baseUrl)
+        assertEquals("", ApiClient(server.url("http://127.0.0.1:${server.port}/").toString(), false, store).baseUrl)
         assertEquals("", ApiClient("http://192.168.1.1/", true, store).baseUrl)
         assertEquals("", ApiClient("https://user:password@example.test/", false, store).baseUrl)
     }
