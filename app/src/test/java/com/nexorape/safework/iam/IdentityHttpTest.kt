@@ -81,13 +81,14 @@ class IdentityHttpTest {
         assertNull(store.read()); assertEquals(1, store.invalidations.value)
     }
 
-    @Test fun logoutUsesNoPayloadAndOnlyClearsAfterSuccessOrInvalidSession() = runBlocking {
+    @Test fun logoutAlwaysClearsLocallyAndDistinguishesServerOutcome() = runBlocking {
         store.write(SessionCredential("synthetic-invalid-token", api.baseUrl))
         respond(500)
-        fails(IdentityFailure.SERVER) { useCases.logout() }
-        assertNotNull(store.read())
+        assertEquals(LogoutOutcome.LOCAL_ONLY, useCases.logout())
+        assertNull(store.read())
+        store.write(SessionCredential("synthetic-invalid-token", api.baseUrl))
         respond(204)
-        useCases.logout()
+        assertEquals(LogoutOutcome.SERVER_CONFIRMED, useCases.logout())
         server.takeRequest()
         val logout = server.takeRequest()
         assertEquals("POST", logout.method); assertEquals(0L, logout.bodySize)

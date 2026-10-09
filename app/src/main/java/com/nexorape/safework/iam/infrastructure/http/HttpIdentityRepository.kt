@@ -55,11 +55,15 @@ class HttpIdentityRepository(private val api: ApiClient, private val sessions: S
         UserDto.parse(api.request("PATCH", "api/v1/users/me", gson.toJson(fields))!!).toDomain()
     }
 
-    override suspend fun logout(): Unit = guarded {
-        val credential = sessions.read() ?: return@guarded
-        try { api.request("POST", "api/v1/authentication/sign-out", expected = 204) }
-        catch (e: ApiException) { if (e.status != 401) throw e }
-        sessions.clear(credential.token)
+    override suspend fun logout(): LogoutOutcome = guarded {
+        val credential = sessions.read() ?: return@guarded LogoutOutcome.LOCAL_ONLY
+        try {
+            api.request("POST", "api/v1/authentication/sign-out", expected = 204)
+            LogoutOutcome.SERVER_CONFIRMED
+        } catch (e: ApiException) {
+            if (e.status == 401 && credential.apiUrl == api.baseUrl && api.baseUrl.isNotEmpty())
+                LogoutOutcome.SERVER_CONFIRMED else LogoutOutcome.LOCAL_ONLY
+        } finally { sessions.clear(credential.token) }
     }
 
     private suspend fun <T> guarded(block: suspend () -> T): T = withContext(Dispatchers.IO) {

@@ -8,8 +8,10 @@ interface IdentityRepository {
     suspend fun register(name: FullName, email: EmailAddress, password: Password, invitation: InvitationProof): UserProfile
     suspend fun profile(): UserProfile
     suspend fun updateProfile(name: FullName, phone: PhoneNumber?): UserProfile
-    suspend fun logout()
+    suspend fun logout(): LogoutOutcome
 }
+
+enum class LogoutOutcome { SERVER_CONFIRMED, LOCAL_ONLY }
 
 enum class IdentityFailure {
     INVALID_INPUT, INVALID_CREDENTIALS, SESSION_INVALID, FORBIDDEN, EMAIL_UNAVAILABLE,

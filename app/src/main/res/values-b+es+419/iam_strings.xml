@@ -21,7 +21,8 @@
     <string name="iam_save">Guardar</string>
     <string name="iam_cancel">Cancelar</string>
     <string name="iam_logout">Cerrar sesión</string>
-    <string name="iam_logout_help">El cierre revoca esta sesión en el servidor. Necesitas conexión; si falla, vuelve a intentarlo.</string>
+    <string name="iam_logout_help">El cierre limpia este dispositivo y solicita la revocación al servidor. Si falla la conexión, no se puede confirmar la revocación.</string>
+    <string name="iam_logout_local_only">Sesión cerrada en este dispositivo. No se confirmó la revocación en el servidor; esa sesión puede seguir activa hasta su vencimiento o revocación administrativa.</string>
     <string name="iam_restoring">Verificando la sesión guardada…</string>
     <string name="iam_retry">Reintentar</string>
     <string name="iam_registered">Cuenta creada. Inicia sesión con tus credenciales.</string>

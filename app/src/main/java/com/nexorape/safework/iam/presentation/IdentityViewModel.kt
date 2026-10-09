@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 enum class IdentityScreen { RESTORING, LOGIN, REGISTER, PROFILE, EDIT_PROFILE }
-enum class IdentityNotice { REGISTERED, PROFILE_SAVED }
+enum class IdentityNotice { REGISTERED, PROFILE_SAVED, LOGOUT_LOCAL_ONLY }
 
 data class IdentityUiState(
     val screen: IdentityScreen = IdentityScreen.RESTORING,
@@ -67,8 +67,9 @@ class IdentityViewModel(private val useCases: IdentityUseCases, invalidations: S
     }
 
     fun logout() = perform(isLogout = true) {
-        useCases.logout()
-        IdentityUiState(screen = IdentityScreen.LOGIN)
+        val outcome = useCases.logout()
+        IdentityUiState(screen = IdentityScreen.LOGIN,
+            notice = if (outcome == LogoutOutcome.LOCAL_ONLY) IdentityNotice.LOGOUT_LOCAL_ONLY else null)
     }
 
     fun navigate(screen: IdentityScreen) {
@@ -87,7 +88,7 @@ class IdentityViewModel(private val useCases: IdentityUseCases, invalidations: S
         viewModelScope.launch {
             try {
                 val result = action()
-                if (startedGeneration == generation) mutableState.value = result
+                if (startedGeneration == generation || isLogout) mutableState.value = result
             }
             catch (e: CancellationException) { throw e }
             catch (e: IdentityException) {

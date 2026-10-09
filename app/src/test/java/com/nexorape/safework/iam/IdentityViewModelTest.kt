@@ -33,25 +33,27 @@ class IdentityViewModelTest {
         } finally { Dispatchers.resetMain() }
     }
 
-    @Test fun logoutFailureKeepsProfileAndSuccessfulLogoutHasNoExpiredNotice() = runTest {
+    @Test fun localOnlyLogoutShowsNoticeAndConfirmedLogoutHasNoExpiredNotice() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             val events = MutableStateFlow(0)
             var failLogout = true
             val repo = object : FakeRepository() {
-                override suspend fun logout() {
-                    if (failLogout) throw IdentityException(IdentityFailure.NETWORK)
+                override suspend fun logout(): LogoutOutcome {
                     events.value++
                     yield()
+                    return if (failLogout) LogoutOutcome.LOCAL_ONLY else LogoutOutcome.SERVER_CONFIRMED
                 }
             }
             val vm = IdentityViewModel(IdentityUseCases(repo), events)
             runCurrent(); vm.logout(); runCurrent()
-            assertEquals(IdentityScreen.PROFILE, vm.state.value.screen)
-            assertEquals(IdentityFailure.NETWORK, vm.state.value.error)
-            failLogout = false; vm.logout(); runCurrent()
+            assertEquals(IdentityScreen.LOGIN, vm.state.value.screen)
+            assertNull(vm.state.value.user)
+            assertEquals(IdentityNotice.LOGOUT_LOCAL_ONLY, vm.state.value.notice)
+            failLogout = false; vm.login("synthetic@example.test", "SyntheticPass12"); runCurrent(); vm.logout(); runCurrent()
             assertEquals(IdentityScreen.LOGIN, vm.state.value.screen)
             assertNull(vm.state.value.error)
+            assertNull(vm.state.value.notice)
         } finally { Dispatchers.resetMain() }
     }
 
@@ -61,6 +63,6 @@ class IdentityViewModelTest {
         override suspend fun register(name: FullName, email: EmailAddress, password: Password, invitation: InvitationProof) = user
         override suspend fun profile() = user
         override suspend fun updateProfile(name: FullName, phone: PhoneNumber?) = user
-        override suspend fun logout() { }
+        override suspend fun logout() = LogoutOutcome.SERVER_CONFIRMED
     }
 }

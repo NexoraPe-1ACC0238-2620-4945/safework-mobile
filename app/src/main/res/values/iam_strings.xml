@@ -21,7 +21,8 @@
     <string name="iam_save">Save</string>
     <string name="iam_cancel">Cancel</string>
     <string name="iam_logout">Log out</string>
-    <string name="iam_logout_help">Logout revokes this session on the server. A connection is required; if it fails, retry.</string>
+    <string name="iam_logout_help">Logout clears this device and requests server revocation. If the connection fails, revocation cannot be confirmed.</string>
+    <string name="iam_logout_local_only">Signed out on this device. Server revocation was not confirmed; that session may remain active until expiry or administrative revocation.</string>
     <string name="iam_restoring">Checking saved session…</string>
     <string name="iam_retry">Retry</string>
     <string name="iam_registered">Account created. Log in with your credentials.</string>

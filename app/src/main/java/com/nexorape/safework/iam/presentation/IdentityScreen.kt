@@ -45,7 +45,11 @@ fun IdentityRoute(viewModel: IdentityViewModel) {
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             }
             state.notice?.let {
-                Text(stringResource(if (it == IdentityNotice.REGISTERED) R.string.iam_registered else R.string.iam_profile_saved),
+                Text(stringResource(when (it) {
+                    IdentityNotice.REGISTERED -> R.string.iam_registered
+                    IdentityNotice.PROFILE_SAVED -> R.string.iam_profile_saved
+                    IdentityNotice.LOGOUT_LOCAL_ONLY -> R.string.iam_logout_local_only
+                }),
                     modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             }
             when (state.screen) {
