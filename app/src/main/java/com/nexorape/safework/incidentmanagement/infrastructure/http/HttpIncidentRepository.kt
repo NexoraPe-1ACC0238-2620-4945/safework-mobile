@@ -17,6 +17,10 @@ class HttpIncidentRepository(private val api: ApiClient) : IncidentRepository {
         val json = Gson().toJson(mapOf("title" to draft.title.value, "description" to draft.description.value, "location" to draft.location.value))
         IncidentDto.toDomain(api.request("POST", "api/v1/incidents", json, expected = 201)!!)
     }
+    override suspend fun updateDocument(id: IncidentId, url: IncidentDocumentUrl) = incidentCall {
+        val json = Gson().toJson(mapOf("documentUrl" to url.value))
+        IncidentDto.toDomain(api.request("PATCH", "api/v1/incidents/${id.value}/document", json)!!)
+    }
 }
 
 internal suspend fun <T> incidentCall(action: suspend () -> T): T = withContext(Dispatchers.IO) {

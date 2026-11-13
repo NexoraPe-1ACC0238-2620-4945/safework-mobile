@@ -23,4 +23,24 @@
     <string name="incident_error_input">Check the title, description and location limits.</string>
     <string name="incident_error_conflict">The incident changed or this transition is unavailable. Refresh before trying again.</string>
     <string name="incident_error_not_found">This incident is unavailable to your account.</string>
+    <string name="incident_filter_company">Company reports</string>
+    <string name="incident_filter_mine">My reports</string>
+    <string name="incident_filter_all_statuses">All statuses</string>
+    <string name="incident_filter_status">Status: %1$s</string>
+    <string name="incident_filter_clear">Clear filters</string>
+    <plurals name="incident_filter_count">
+        <item quantity="one">%1$d of %2$d report</item>
+        <item quantity="other">%1$d of %2$d reports</item>
+    </plurals>
+    <string name="incident_filter_empty">No reports match these filters.</string>
+    <string name="incident_open_map">Open location in Maps</string>
+    <string name="incident_document_edit">Edit document reference</string>
+    <string name="incident_document_url">HTTPS document URL</string>
+    <string name="incident_document_help">Link an existing document using its HTTPS URL. Saving replaces the previous reference. This does not upload a file or change access to that document. Only the reporter or responsible employer can save changes.</string>
+    <string name="incident_document_save">Save reference</string>
+    <string name="incident_document_saved">Document reference saved.</string>
+    <string name="incident_document_open">Open document reference</string>
+    <string name="incident_document_invalid">Enter a valid HTTPS URL, up to 2048 characters, without a username or password.</string>
+    <string name="incident_document_unavailable">The document reference cannot be opened safely. Ask the reporter to update it.</string>
+    <string name="incident_reference_unavailable">No application could open this reference.</string>
 </resources>

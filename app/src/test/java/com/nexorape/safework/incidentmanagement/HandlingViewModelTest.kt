@@ -28,6 +28,7 @@ class HandlingViewModelTest {
                 override suspend fun list() = emptyList<Incident>()
                 override suspend fun find(id: IncidentId): Incident = error("Not invoked")
                 override suspend fun report(draft: IncidentDraft): Incident = error("Not invoked")
+                override suspend fun updateDocument(id: IncidentId, url: IncidentDocumentUrl): Incident = error("Not invoked")
             }
             val actor = UserProfile(UserId(3), CompanyId(2), FullName.of("Synthetic"), EmailAddress.of("synthetic@example.test"), null, setOf(Role.EMPLOYER))
             val events = MutableStateFlow(0)
