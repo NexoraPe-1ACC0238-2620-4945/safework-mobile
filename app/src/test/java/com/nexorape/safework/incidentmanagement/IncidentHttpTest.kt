@@ -54,6 +54,38 @@ class IncidentHttpTest {
         server.enqueue(MockResponse().setResponseCode(401))
         expect(IncidentFailure.SESSION_INVALID) { cases.list(actor) }; assertNull(store.read())
     }
+    @Test fun savesDocumentReferenceThroughExistingAuthenticatedContract() = runBlocking {
+        val url = "https://example.test/safety-manual.pdf"
+        server.enqueue(MockResponse().setBody(json.replace("\"documentUrl\":null", "\"documentUrl\":\"$url\"")))
+        assertEquals(url, cases.updateDocument(IncidentId(5), " $url ", actor).documentUrl)
+        val request = server.takeRequest()
+        assertEquals("PATCH", request.method)
+        assertEquals("/api/v1/incidents/5/document", request.path)
+        val body = JsonParser.parseString(request.body.readUtf8()).asJsonObject
+        assertEquals(setOf("documentUrl"), body.keySet())
+        assertEquals(url, body["documentUrl"].asString)
+        assertEquals("Bearer synthetic-invalid-token", request.getHeader("Authorization"))
+    }
+    @Test fun invalidDocumentDoesNotSendARequestAndUnexpectedResponseIsRejected() = runBlocking {
+        expect(IncidentFailure.INVALID_DOCUMENT_URL) { cases.updateDocument(IncidentId(5), "file:///private", actor) }
+        assertEquals(0, server.requestCount)
+        val url = "https://example.test/manual.pdf"
+        val saved = json.replace("\"documentUrl\":null", "\"documentUrl\":\"$url\"")
+        listOf(saved.replace("\"companyId\":2", "\"companyId\":3"),
+            saved.replace("\"id\":5", "\"id\":6"), json).forEach { unexpected ->
+            server.enqueue(MockResponse().setBody(unexpected))
+            expect(IncidentFailure.INVALID_RESPONSE) { cases.updateDocument(IncidentId(5), url, actor) }
+        }
+    }
+    @Test fun documentPermissionFailureKeepsSessionAndExpiredSessionClearsIt() = runBlocking {
+        val url = "https://example.test/manual.pdf"
+        server.enqueue(MockResponse().setResponseCode(403))
+        expect(IncidentFailure.FORBIDDEN) { cases.updateDocument(IncidentId(5), url, actor) }
+        assertNotNull(store.read())
+        server.enqueue(MockResponse().setResponseCode(401))
+        expect(IncidentFailure.SESSION_INVALID) { cases.updateDocument(IncidentId(5), url, actor) }
+        assertNull(store.read())
+    }
     private suspend fun expect(reason: IncidentFailure, action: suspend () -> Any?) {
         try { action(); fail("Expected rejection") } catch (e: IncidentException) { assertEquals(reason, e.reason) }
     }

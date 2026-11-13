@@ -3,6 +3,8 @@ package com.nexorape.safework.incidentmanagement.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nexorape.safework.iam.domain.model.UserProfile
+import com.nexorape.safework.iam.domain.model.UserId
+import com.nexorape.safework.iam.domain.model.Role
 import com.nexorape.safework.incidentmanagement.application.IncidentUseCases
 import com.nexorape.safework.incidentmanagement.application.CaptureIncidentLocation
 import com.nexorape.safework.incidentmanagement.domain.model.*
@@ -10,13 +12,20 @@ import com.nexorape.safework.incidentmanagement.domain.repositories.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
-enum class IncidentPage { LIST, DETAIL, REPORT }
+enum class IncidentPage { LIST, DETAIL, REPORT, DOCUMENT }
 data class IncidentUiState(
     val page: IncidentPage = IncidentPage.LIST, val items: List<Incident> = emptyList(), val selected: Incident? = null,
     val busy: Boolean = false, val error: IncidentFailure? = null, val reported: Boolean = false,
     val title: String = "", val description: String = "", val location: String = "",
     val locating: Boolean = false, val locationUnavailable: Boolean = false,
-)
+    val statusFilter: IncidentStatus? = null, val reporterFilter: UserId? = null,
+    val documentUrl: String = "", val documentSaved: Boolean = false,
+) {
+    val visibleItems: List<Incident> get() = items.filter {
+        (statusFilter == null || it.status == statusFilter) &&
+            (reporterFilter == null || it.reporterId == reporterFilter)
+    }
+}
 
 class IncidentViewModel(private val cases: IncidentUseCases, actor: UserProfile,
                         private val locationCapture: CaptureIncidentLocation, invalidations: StateFlow<Int>) : ViewModel() {
@@ -44,7 +53,40 @@ class IncidentViewModel(private val cases: IncidentUseCases, actor: UserProfile,
             if (state.value.page == IncidentPage.DETAIL && state.value.selected?.id == id) pendingDetail = id
             return
         }
-        runAction { state.value.copy(selected = cases.detail(id, it), page = IncidentPage.DETAIL) }
+        runAction { state.value.copy(selected = cases.detail(id, it), page = IncidentPage.DETAIL, documentSaved = false) }
+    }
+    fun filterStatus(status: IncidentStatus?) {
+        if (!state.value.busy && identity != null) mutable.value = state.value.copy(statusFilter = status)
+    }
+    fun filterReporter(onlyMine: Boolean) {
+        val actor = identity ?: return
+        if (!state.value.busy) mutable.value = state.value.copy(reporterFilter = if (onlyMine) actor.id else null)
+    }
+    fun clearFilters() {
+        if (!state.value.busy && identity != null) mutable.value = state.value.copy(statusFilter = null, reporterFilter = null)
+    }
+    fun canEditDocument(): Boolean {
+        val actor = identity ?: return false
+        val incident = state.value.selected ?: return false
+        return incident.reporterId == actor.id || Role.EMPLOYER in actor.roles
+    }
+    fun openDocument() {
+        if (state.value.busy || !canEditDocument()) return
+        mutable.value = state.value.copy(page = IncidentPage.DOCUMENT,
+            documentUrl = state.value.selected?.documentUrl.orEmpty(), documentSaved = false, error = null)
+    }
+    fun editDocument(value: String) {
+        if (!state.value.busy) mutable.value = state.value.copy(documentUrl = value, error = null)
+    }
+    fun saveDocument() {
+        if (state.value.page != IncidentPage.DOCUMENT) return
+        val selected = state.value.selected ?: return
+        runAction { actor ->
+            val updated = cases.updateDocument(selected.id, state.value.documentUrl, actor)
+            state.value.copy(page = IncidentPage.DETAIL, selected = updated,
+                items = state.value.items.map { if (it.id == updated.id) updated else it },
+                documentUrl = "", documentSaved = true)
+        }
     }
     fun openReport() {
         if (state.value.busy) return
@@ -53,6 +95,10 @@ class IncidentViewModel(private val cases: IncidentUseCases, actor: UserProfile,
     fun back() {
         if (state.value.busy) return
         cancelLocation()
+        if (state.value.page == IncidentPage.DOCUMENT) {
+            mutable.value = state.value.copy(page = IncidentPage.DETAIL, documentUrl = "", error = null)
+            return
+        }
         mutable.value = state.value.copy(page = IncidentPage.LIST, selected = null, error = null)
     }
     fun edit(title: String = state.value.title, description: String = state.value.description,

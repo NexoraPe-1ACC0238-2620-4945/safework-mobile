@@ -22,6 +22,7 @@ class IncidentViewModelTest {
                 override suspend fun list() = response.await()
                 override suspend fun find(id: IncidentId): Incident = error("Not invoked")
                 override suspend fun report(draft: IncidentDraft): Incident = error("Not invoked")
+                override suspend fun updateDocument(id: IncidentId, url: IncidentDocumentUrl): Incident = error("Not invoked")
             }
             val events = MutableStateFlow(0)
             val location = CaptureIncidentLocation(object : LocationProvider { override suspend fun capture(): IncidentLocation? = null })
@@ -43,6 +44,7 @@ class IncidentViewModelTest {
                 override suspend fun list() = emptyList<Incident>()
                 override suspend fun find(id: IncidentId): Incident = error("Not invoked")
                 override suspend fun report(draft: IncidentDraft): Incident = error("Not invoked")
+                override suspend fun updateDocument(id: IncidentId, url: IncidentDocumentUrl): Incident = error("Not invoked")
             }
             var fixes = 0
             val capture = CaptureIncidentLocation(object : LocationProvider {

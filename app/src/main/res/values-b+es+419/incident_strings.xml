@@ -23,4 +23,25 @@
     <string name="incident_error_input">Revisa los límites del título, la descripción y la ubicación.</string>
     <string name="incident_error_conflict">El incidente cambió o la transición no está disponible. Actualiza antes de volver a intentarlo.</string>
     <string name="incident_error_not_found">Este incidente no está disponible para tu cuenta.</string>
+    <string name="incident_filter_company">Reportes de empresa</string>
+    <string name="incident_filter_mine">Mis reportes</string>
+    <string name="incident_filter_all_statuses">Todos los estados</string>
+    <string name="incident_filter_status">Estado: %1$s</string>
+    <string name="incident_filter_clear">Quitar filtros</string>
+    <plurals name="incident_filter_count">
+        <item quantity="one">%1$d de %2$d reporte</item>
+        <item quantity="many">%1$d de %2$d reportes</item>
+        <item quantity="other">%1$d de %2$d reportes</item>
+    </plurals>
+    <string name="incident_filter_empty">No hay reportes que coincidan con los filtros.</string>
+    <string name="incident_open_map">Abrir ubicación en Maps</string>
+    <string name="incident_document_edit">Editar referencia de documento</string>
+    <string name="incident_document_url">URL HTTPS del documento</string>
+    <string name="incident_document_help">Vincula un documento existente mediante su URL HTTPS. Al guardar se reemplaza la referencia anterior. Esto no carga un archivo ni cambia el acceso al documento. Solo quien reportó o el responsable de atención puede guardar cambios.</string>
+    <string name="incident_document_save">Guardar referencia</string>
+    <string name="incident_document_saved">Referencia de documento guardada.</string>
+    <string name="incident_document_open">Abrir referencia de documento</string>
+    <string name="incident_document_invalid">Ingresa una URL HTTPS válida de hasta 2048 caracteres, sin usuario ni contraseña.</string>
+    <string name="incident_document_unavailable">No se puede abrir esta referencia de forma segura. Solicita su actualización a quien reportó.</string>
+    <string name="incident_reference_unavailable">Ninguna aplicación pudo abrir esta referencia.</string>
 </resources>

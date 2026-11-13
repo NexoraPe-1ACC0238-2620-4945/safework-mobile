@@ -2,22 +2,32 @@
 
 Native Android application for SafeWork, by NexoraPe. UPC course 1ACC0238, academic period 202620, NRC 4945.
 
+## Android completion work
+
+The `feature/android-readiness` increment builds on the integrated `test` branch. It adds combined status/personal-report filters, an editor for the existing HTTPS document-reference endpoint, and explicit external-map/document opening. A reference is not an uploaded attachment or a push notification.
+
+See the [completion plan and backlog matrix](docs/android-readiness-plan.md) for the ordered work, backend proposals and physical demonstration checklist. The older results below retain their October environment and scope; they are not a new live test of this increment.
+
+This increment's [executed verification](docs/android-readiness-verification.md) records 35 passing tests, three skipped local integrations, a successful debug APK build and lint with zero errors/four warnings. Current Render availability and phone execution remain unconfirmed.
+
 ## Current scope
 
-The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. Incident Management supports current-company list/detail/reporting, editable manual location with optional one-shot device coordinates, responsible self-assignment and start/close lifecycle actions. Notification Management adds the current authenticated recipient's notifications. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
+The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. Incident Management supports current-company list/detail/reporting, combined status/own-report filtering, editable manual location with optional one-shot device coordinates, external-map opening, existing HTTPS document references, responsible self-assignment and start/close lifecycle actions. Notification Management adds the current authenticated recipient's notifications. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
 
 - `app`: Android, Compose Presentation and HTTP/secure-storage Infrastructure.
 - `business`: pure Kotlin Domain/Application, identity value objects, repository contracts and use cases.
 - Dependency direction: `app` → `business`.
 - Base package/application ID: `com.nexorape.safework`; Android 8.0/API26 minimum, compile/target35, JDK17.
 
-Android ADMIN functions, refresh tokens, reassignment, push notifications and mark-as-read are not included. This is **not the complete TB1 delivery**. The corrected current-course backend runs locally for validation; no deployed API is supplied. The IAM and Daniel prerequisites are retained from `test`. PR #5 adds Francisco's incident handling and notifications, plus a follow-up fix that prevents a failed notification query from displaying a false empty state. Corrected-code verification passed 31 tests without failures or skips, including three real local integrations (91 HTTP requests), debug/unsigned-release builds and lint (0 errors / 9 existing warnings). Physical take/start/confirmed-close/notification consultation, cancellation, reopening and simulated 503 recovery were checked. Full TalkBack, broader large-text/device coverage and negative physical UI checks remain pending. See the validation records below.
+Android ADMIN functions, file uploads, case notes, department editing, refresh tokens, reassignment, push notifications and mark-as-read are not included. Completion is assessed against the [backlog matrix](docs/android-readiness-plan.md), not a blanket percentage. Historical October validation used the corrected local backend. The team subsequently confirmed a public Render deployment and basic Internet phone flow; present availability and this increment's new flows still need verification. The IAM and Daniel prerequisites are retained from `test`. PR #5 adds Francisco's incident handling and notifications, plus a follow-up fix that prevents a failed notification query from displaying a false empty state. Historical corrected-code verification passed 31 tests without failures or skips, including three real local integrations (91 HTTP requests), debug/unsigned-release builds and lint (0 errors / 9 existing warnings). Physical take/start/confirmed-close/notification consultation, cancellation, reopening and simulated 503 recovery were checked. Full TalkBack, broader large-text/device coverage and negative physical UI checks remain pending. See the validation records below.
 
 The UI increment adds a shared violet design system with bundled Raleway/Montserrat fonts and retained OFL licenses, a compact SafeWork header and bottom navigation (Profile, Incidents, Alerts / Perfil, Incidentes, Avisos). IAM forms, incident cards/actions and notification cards reuse the theme; password visibility is accessible and temporary. Business rules, HTTP contracts and IAM sessions are retained. See [UI verification and physical review limits](docs/ui-design-system-validation.md) for this increment; earlier feature checks do not certify every redesigned screen.
 
 ## Documentation
 
 - [Architecture and planned context packages](docs/architecture.md)
+- [Android completion plan and backlog matrix](docs/android-readiness-plan.md)
+- [Learning notes and Flutter syntax bridge](docs/learning-notes.md)
 - [Reference comparison and toolchain rationale](docs/reference-review.md)
 - [Current and historical backend contract review](docs/backend-contract-review.md)
 - [Foundation verification record](docs/verification.md)

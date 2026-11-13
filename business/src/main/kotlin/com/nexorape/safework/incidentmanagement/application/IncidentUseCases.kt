@@ -26,6 +26,15 @@ class IncidentUseCases(private val repository: IncidentRepository) {
             if (it.reporterId != actor.id || it.status != IncidentStatus.OPEN) invalidResponse()
         }
     }
+    suspend fun updateDocument(id: IncidentId, rawUrl: String, actor: UserProfile): Incident {
+        requireReader(actor)
+        val url = try { IncidentDocumentUrl.of(rawUrl) }
+        catch (_: IllegalArgumentException) { throw IncidentException(IncidentFailure.INVALID_DOCUMENT_URL) }
+        return repository.updateDocument(id, url).also {
+            validateCompany(it, actor)
+            if (it.id != id || it.documentUrl != url.value) invalidResponse()
+        }
+    }
     private fun requireReader(actor: UserProfile) {
         if (Role.WORKER !in actor.roles && Role.EMPLOYER !in actor.roles) throw IncidentException(IncidentFailure.FORBIDDEN)
     }
