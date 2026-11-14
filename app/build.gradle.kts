@@ -4,9 +4,10 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
-// No historical/default production host. Configure published HTTPS explicitly.
+// Published HTTPS is configured in gradle.properties; local builds may override it.
 val publishedApiUrl = providers.gradleProperty("safework.apiUrl").orElse("")
-val localApiUrl = providers.gradleProperty("safework.localApiUrl").orElse("http://127.0.0.1:18082/")
+val localApiUrl = providers.gradleProperty("safework.localApiUrl").orElse(
+    publishedApiUrl.map { it.ifBlank { "http://127.0.0.1:18086/" } })
 fun quoted(value: String) = "\"" + value.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
 
 android {

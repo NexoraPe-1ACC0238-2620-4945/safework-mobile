@@ -34,7 +34,8 @@ class ApiClient(
     }
 
     suspend fun request(method: String, path: String, body: String? = null, authenticated: Boolean = true,
-                        tokenOverride: String? = null, expected: Int = 200): JsonElement? {
+                        tokenOverride: String? = null, expected: Int = 200,
+                        query: Map<String, String> = emptyMap()): JsonElement? {
         if (baseUrl.isEmpty()) throw ApiException(0, "NOT_CONFIGURED")
         val credential = if (authenticated && tokenOverride == null) sessions.read() else null
         if (credential != null && credential.apiUrl != baseUrl) {
@@ -44,7 +45,10 @@ class ApiClient(
         val token = tokenOverride ?: credential?.token
         if (authenticated && token.isNullOrBlank()) throw ApiException(401, "SESSION_INVALID")
         require(path.startsWith("api/v1/") && '?' !in path && '#' !in path)
-        val builder = Request.Builder().url(baseUrl + path).header("Accept", "application/json")
+        val url = (baseUrl + path).toHttpUrlOrNull()!!.newBuilder().apply {
+            query.forEach { (key, value) -> addQueryParameter(key, value) }
+        }.build()
+        val builder = Request.Builder().url(url).header("Accept", "application/json")
         if (authenticated) builder.header("Authorization", "Bearer $token")
         val payload = body?.toRequestBody("application/json; charset=utf-8".toMediaType())
             ?: if (method == "POST" || method == "PATCH") ByteArray(0).toRequestBody(null) else null
@@ -57,7 +61,14 @@ class ApiClient(
                 // Interpret only whitelisted code; never expose arbitrary server message/body.
                 val code = when (it.code) {
                     400 -> "INVALID_INPUT"; 401 -> if (authenticated) "SESSION_INVALID" else "INVALID_CREDENTIALS"
-                    403 -> "FORBIDDEN"; 409 -> "EMAIL_UNAVAILABLE"; 422 -> "INVITATION_INVALID"
+                    403 -> "FORBIDDEN"; 404 -> "NOT_FOUND"
+                    409 -> {
+                        val serverCode = runCatching {
+                            JsonParser.parseString(it.peekBody(4096L).string()).asJsonObject["code"]?.asString
+                        }.getOrNull()
+                        if (path == "api/v1/authentication/sign-up" && serverCode == "EMAIL_UNAVAILABLE")
+                            "EMAIL_UNAVAILABLE" else "CONFLICT"
+                    }
                     429 -> "RATE_LIMITED"; else -> "SERVER"
                 }
                 throw ApiException(it.code, code)

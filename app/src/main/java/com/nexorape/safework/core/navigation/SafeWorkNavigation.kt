@@ -20,6 +20,8 @@ import com.nexorape.safework.core.designsystem.components.*
 import com.nexorape.safework.core.configuration.AppGraph
 import com.nexorape.safework.iam.domain.model.Role
 import com.nexorape.safework.iam.presentation.*
+import com.nexorape.safework.iam.application.CompanyUseCases
+import com.nexorape.safework.iam.infrastructure.http.HttpCompanyRepository
 import com.nexorape.safework.incidentmanagement.application.IncidentUseCases
 import com.nexorape.safework.incidentmanagement.application.CaptureIncidentLocation
 import com.nexorape.safework.incidentmanagement.application.IncidentHandlingUseCases
@@ -31,7 +33,7 @@ import com.nexorape.safework.notificationmanagement.application.GetUserNotificat
 import com.nexorape.safework.notificationmanagement.infrastructure.http.HttpNotificationRepository
 import com.nexorape.safework.notificationmanagement.presentation.*
 
-private enum class Destination { PROFILE, INCIDENTS, NOTIFICATIONS }
+private enum class Destination { PROFILE, COMPANY, INCIDENTS, NOTIFICATIONS }
 
 @Composable
 fun SafeWorkNavigation(identity: IdentityViewModel, graph: AppGraph) {
@@ -45,19 +47,32 @@ fun SafeWorkNavigation(identity: IdentityViewModel, graph: AppGraph) {
         owner.lifecycle.addObserver(observer)
         onDispose { owner.lifecycle.removeObserver(observer) }
     }
-    var destination by remember(user.id, revision) { mutableStateOf(Destination.PROFILE) }
+    var destination by remember(user.id, user.membershipStatus, revision) {
+        mutableStateOf(if (user.hasActiveMembership) Destination.PROFILE else Destination.COMPANY)
+    }
     BackHandler(enabled = destination != Destination.PROFILE) { destination = Destination.PROFILE }
-    val businessUser = Role.WORKER in user.roles || Role.EMPLOYER in user.roles
+    val businessUser = user.canAccessCompany
     val context = LocalContext.current
     val entries = listOfNotNull(
         SafeWorkNavItem(stringResource(R.string.design_nav_profile), SafeWorkIcons.Person),
+        SafeWorkNavItem(stringResource(R.string.company_title), SafeWorkIcons.Company),
         if (businessUser) SafeWorkNavItem(stringResource(R.string.incidents_title), SafeWorkIcons.Incidents) else null,
         if (businessUser) SafeWorkNavItem(stringResource(R.string.design_nav_notifications), SafeWorkIcons.Bell) else null,
     )
-    SafeWorkShell(entries, if (businessUser) destination.ordinal else 0,
+    SafeWorkShell(entries, if (businessUser || destination == Destination.COMPANY) destination.ordinal else 0,
         onSelect = { destination = Destination.entries[it] }) {
-            if (destination == Destination.INCIDENTS && businessUser) {
-                val incidentModel: IncidentViewModel = viewModel(key = "incident-${user.id.value}-${user.companyId.value}-$revision",
+            if (destination == Destination.COMPANY) {
+                val companyModel: CompanyViewModel = viewModel(key = "company-${user.id.value}-${user.companyId?.value}-${user.membershipStatus}-$revision",
+                    factory = object : ViewModelProvider.Factory {
+                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                            require(modelClass == CompanyViewModel::class.java)
+                            @Suppress("UNCHECKED_CAST")
+                            return CompanyViewModel(CompanyUseCases(HttpCompanyRepository(graph.api)), user, graph.sessions.invalidations) as T
+                        }
+                    })
+                CompanyRoute(companyModel, user, identity::refresh, identity::companyCreated)
+            } else if (destination == Destination.INCIDENTS && businessUser) {
+                val incidentModel: IncidentViewModel = viewModel(key = "incident-${user.id.value}-${user.companyId?.value}-$revision",
                     factory = object : ViewModelProvider.Factory {
                         override fun <T : ViewModel> create(modelClass: Class<T>): T {
                             require(modelClass == IncidentViewModel::class.java)
@@ -81,7 +96,7 @@ fun SafeWorkNavigation(identity: IdentityViewModel, graph: AppGraph) {
                     }
                 }
             } else if (destination == Destination.NOTIFICATIONS && businessUser) {
-                val notifications: NotificationViewModel = viewModel(key = "notifications-${user.id.value}-${user.companyId.value}-$revision",
+                val notifications: NotificationViewModel = viewModel(key = "notifications-${user.id.value}-${user.companyId?.value}-$revision",
                     factory = object : ViewModelProvider.Factory {
                         override fun <T : ViewModel> create(modelClass: Class<T>): T {
                             require(modelClass == NotificationViewModel::class.java)

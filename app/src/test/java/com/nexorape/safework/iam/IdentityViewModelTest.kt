@@ -60,7 +60,7 @@ class IdentityViewModelTest {
     private open inner class FakeRepository : IdentityRepository {
         override suspend fun restore() = user
         override suspend fun login(email: EmailAddress, password: Password) = user
-        override suspend fun register(name: FullName, email: EmailAddress, password: Password, invitation: InvitationProof) = user
+        override suspend fun register(name: FullName, email: EmailAddress, password: Password) = user
         override suspend fun profile() = user
         override suspend fun updateProfile(name: FullName, phone: PhoneNumber?) = user
         override suspend fun logout() = LogoutOutcome.SERVER_CONFIRMED

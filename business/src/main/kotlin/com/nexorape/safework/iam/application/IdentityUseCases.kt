@@ -8,8 +8,8 @@ class IdentityUseCases(private val repository: IdentityRepository) {
     suspend fun login(email: String, password: String) = validated {
         repository.login(EmailAddress.of(email), Password.forLogin(password))
     }
-    suspend fun register(name: String, email: String, password: String, invitation: String) = validated {
-        repository.register(FullName.of(name), EmailAddress.of(email), Password.forRegistration(password), InvitationProof.of(invitation))
+    suspend fun register(name: String, email: String, password: String) = validated {
+        repository.register(FullName.of(name), EmailAddress.of(email), Password.forRegistration(password))
     }
     suspend fun profile() = repository.profile()
     suspend fun updateProfile(name: String, phone: String) = validated {

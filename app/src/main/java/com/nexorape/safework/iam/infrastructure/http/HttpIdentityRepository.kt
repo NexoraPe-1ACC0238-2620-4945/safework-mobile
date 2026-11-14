@@ -37,12 +37,18 @@ class HttpIdentityRepository(private val api: ApiClient, private val sessions: S
         }
     }
 
-    override suspend fun register(name: FullName, email: EmailAddress, password: Password,
-                                  invitation: InvitationProof): UserProfile = guarded {
+    override suspend fun register(name: FullName, email: EmailAddress, password: Password): UserProfile = guarded {
         val body = gson.toJson(mapOf("fullName" to name.value, "emailAddress" to email.value,
-            "password" to password.value, "invitationToken" to invitation.value))
-        UserDto.parse(api.request("POST", "api/v1/authentication/sign-up", body, authenticated = false, expected = 201)!!).toDomain()
-            .also { require(it.roles == setOf(Role.WORKER)) }
+            "password" to password.value))
+        val result = try {
+            api.request("POST", "api/v1/authentication/sign-up", body, authenticated = false, expected = 201)!!
+        } catch (e: ApiException) {
+            // A database/state failure is not evidence that this email is already registered.
+            if (e.status == 409 && e.code != "EMAIL_UNAVAILABLE") throw IdentityException(IdentityFailure.SERVER)
+            throw e
+        }
+        UserDto.parse(result).toDomain()
+            .also { require(it.roles == setOf(Role.WORKER) && it.membershipStatus == MembershipStatus.UNASSIGNED) }
     }
 
     override suspend fun profile(): UserProfile = guarded {

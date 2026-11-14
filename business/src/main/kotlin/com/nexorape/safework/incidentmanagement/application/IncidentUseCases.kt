@@ -27,7 +27,7 @@ class IncidentUseCases(private val repository: IncidentRepository) {
         }
     }
     private fun requireReader(actor: UserProfile) {
-        if (Role.WORKER !in actor.roles && Role.EMPLOYER !in actor.roles) throw IncidentException(IncidentFailure.FORBIDDEN)
+        if (!actor.canAccessCompany) throw IncidentException(IncidentFailure.FORBIDDEN)
     }
     private fun validateCompany(incident: Incident, actor: UserProfile) {
         if (incident.companyId != actor.companyId) invalidResponse()

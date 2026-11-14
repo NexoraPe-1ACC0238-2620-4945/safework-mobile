@@ -5,12 +5,20 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class IdentityRulesTest {
+    @Test fun onlyActiveMembershipAllowsBusinessAccess() {
+        val unassigned = UserProfile(UserId(1), null, FullName.of("Synthetic"), EmailAddress.of("synthetic@example.test"), null, setOf(Role.WORKER))
+        assertFalse(unassigned.canAccessCompany)
+        val active = unassigned.copy(companyId = CompanyId(2), membershipStatus = MembershipStatus.ACTIVE)
+        assertTrue(active.canAccessCompany)
+        assertFalse(active.copy(membershipStatus = MembershipStatus.REVOKED).canAccessCompany)
+        invalid { unassigned.copy(membershipStatus = MembershipStatus.ACTIVE) }
+        invalid { active.copy(membershipStatus = MembershipStatus.UNASSIGNED) }
+    }
     @Test fun normalizesIdentityWithoutNormalizingPassword() {
         assertEquals("synthetic@example.test", EmailAddress.of(" Synthetic@Example.Test ").value)
         assertEquals("Synthetic Worker", FullName.of(" Synthetic Worker ").value)
         assertEquals("  Synthetic1  ", Password.forRegistration("  Synthetic1  ").value)
         assertFalse(Password.forLogin("old-password").toString().contains("old-password"))
-        assertFalse(InvitationProof.of("synthetic-proof").toString().contains("synthetic-proof"))
     }
 
     @Test fun enforcesUnicodeAndUtf8Limits() {
@@ -28,7 +36,6 @@ class IdentityRulesTest {
         invalid { FullName.of(" \n ") }
         PhoneNumber.of("+51 900 000 000")
         listOf("123", "       ", "51+900000000", "+-------", "letters").forEach { invalid { PhoneNumber.of(it) } }
-        invalid { InvitationProof.of(" ") }
     }
 
     private fun invalid(action: () -> Unit) {

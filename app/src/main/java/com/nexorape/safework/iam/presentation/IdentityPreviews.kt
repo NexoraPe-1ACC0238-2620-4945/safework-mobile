@@ -20,7 +20,7 @@ private annotation class IdentityVariants
 // Synthetic presentation-only samples. No ViewModel, network, sessions or credentials.
 private val sampleUser = UserProfile(UserId(1), CompanyId(1), FullName.of("Alex Morgan"),
     EmailAddress.of("alex@example.test"), PhoneNumber.of("+51 900 000 001"), setOf(Role.WORKER))
-private val previewActions = IdentityActions({ _, _ -> }, { _, _, _, _ -> }, {}, { _, _ -> }, {}, {}, {})
+private val previewActions = IdentityActions({ _, _ -> }, { _, _, _ -> }, {}, { _, _ -> }, {}, {}, {})
 
 @IdentityVariants
 @Composable

@@ -33,7 +33,7 @@ class HandlingViewModelTest {
             val events = MutableStateFlow(0)
             val vm = IncidentHandlingViewModel(IncidentHandlingUseCases(repository), IncidentUseCases(queries), actor, events)
             runCurrent()
-            vm.observe(Incident(IncidentId(5), UserId(1), actor.companyId, IncidentTitle.of("Synthetic"), IncidentDescription.of("Synthetic"),
+            vm.observe(Incident(IncidentId(5), UserId(1), requireNotNull(actor.companyId), IncidentTitle.of("Synthetic"), IncidentDescription.of("Synthetic"),
                 IncidentLocation.of("Manual"), IncidentStatus.ASSIGNED, null, "Synthetic", "Synthetic")); runCurrent()
             events.value++; runCurrent(); delayed.complete(emptyList()); runCurrent()
             assertNull(vm.state.value.incident); assertNull(vm.state.value.assignment); assertFalse(vm.state.value.busy)

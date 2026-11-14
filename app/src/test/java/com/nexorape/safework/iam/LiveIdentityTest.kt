@@ -1,74 +1,56 @@
 package com.nexorape.safework.iam
 
-import com.google.gson.Gson
-import com.nexorape.safework.core.network.ApiClient
-import com.nexorape.safework.iam.application.IdentityUseCases
+import com.nexorape.safework.core.network.ApiException
+import com.nexorape.safework.iam.domain.model.*
 import com.nexorape.safework.iam.domain.repositories.*
-import com.nexorape.safework.iam.infrastructure.http.HttpIdentityRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
 import org.junit.Assume.assumeTrue
 import org.junit.Test
-import java.util.UUID
-import java.util.Collections
-import java.util.concurrent.TimeUnit
-import okhttp3.OkHttpClient
 
-/** Opt-in synthetic HTTP checks against the pinned current-course local server, never history. */
 class LiveIdentityTest {
-    @Test fun invitationLoginProfileRestoreIndependentLogoutAndRevocation() = runBlocking {
+    @Test fun selfServiceCreationApprovalIsolationAndRevocation() = runBlocking {
         val url = System.getenv("SAFEWORK_LIVE_API_URL")
-        assumeTrue("Local backend integration requires explicit configuration", !url.isNullOrBlank())
-        require(url!!.startsWith("http://127.0.0.1:"))
-        val adminEmail = System.getenv("SAFEWORK_TEST_ADMIN_EMAIL") ?: error("Missing synthetic operator fixture")
-        val adminPassword = System.getenv("SAFEWORK_TEST_ADMIN_PASSWORD") ?: error("Missing synthetic operator fixture")
-        val evidence = Collections.synchronizedList(mutableListOf<Map<String, Any>>())
-        val transport = OkHttpClient.Builder().followRedirects(false).followSslRedirects(false)
-            .retryOnConnectionFailure(false).callTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                val response = chain.proceed(chain.request())
-                evidence.add(mapOf("method" to chain.request().method,
-                    "path" to chain.request().url.encodedPath, "status" to response.code))
-                response
-            }.build()
-        fun api(store: MemorySessions) = ApiClient(url, true, store, transport)
-        val adminStore = MemorySessions()
-        val adminApi = api(adminStore)
-        val admin = IdentityUseCases(HttpIdentityRepository(adminApi, adminStore))
-        val operator = admin.login(adminEmail, adminPassword)
-        val email = UUID.randomUUID().toString() + "@example.test"
-        val password = "Synthetic-" + UUID.randomUUID().toString()
-        val gson = Gson()
-        val invitation = adminApi.request("POST", "api/v1/companies/${operator.companyId.value}/invitations",
-            gson.toJson(mapOf("emailAddress" to email)), expected = 201)!!.asJsonObject["invitationToken"].asString
-        val firstStore = MemorySessions()
-        val first = IdentityUseCases(HttpIdentityRepository(api(firstStore), firstStore))
-        val worker = first.register("Synthetic Mobile Worker", email, password, invitation)
-        assertEquals(setOf("WORKER"), worker.roles.map { it.name }.toSet()); assertNull(firstStore.read())
-        val signed = first.login(email, password)
-        assertEquals(worker.id, signed.id)
-        assertEquals(signed, first.restore())
-        val updated = first.updateProfile("Synthetic Mobile Edited", "+51 900 000 000")
-        assertEquals("Synthetic Mobile Edited", updated.fullName.value)
-        assertEquals("+51 900 000 000", updated.phone?.value)
-        val secondStore = MemorySessions()
-        val second = IdentityUseCases(HttpIdentityRepository(api(secondStore), secondStore))
-        second.login(email, password)
-        expect(IdentityFailure.INVALID_CREDENTIALS) { second.login(email, "Synthetic-wrong-password") }
-        assertEquals(updated, second.profile())
-        first.logout()
-        assertNull(firstStore.read()); assertNull(first.restore())
-        assertEquals(updated, second.profile())
-        adminApi.request("PATCH", "api/v1/administration/users/${worker.id.value}/roles",
-            gson.toJson(mapOf("roles" to listOf("WORKER", "EMPLOYER"))))
-        expect(IdentityFailure.SESSION_INVALID) { second.profile() }
-        assertNull(secondStore.read())
-        assertEquals(setOf("WORKER", "EMPLOYER"), second.login(email, password).roles.map { it.name }.toSet())
-        second.logout(); admin.logout()
-        println("Live IAM HTTP results (methods/paths/statuses only): " + gson.toJson(evidence))
+        assumeTrue("Explicit isolated local backend required", !url.isNullOrBlank())
+        val employer = LocalAccount(url!!).register()
+        assertNull(employer.user.companyId)
+        assertFalse(employer.user.canAccessCompany)
+        rejectStatus(403) { employer.api.request("GET", "api/v1/incidents") }
+        employer.createCompany()
+        assertTrue(employer.user.isEmployer)
+        val worker = LocalAccount(url).register()
+        val company = requireNotNull(employer.user.companyId)
+        assertTrue(worker.companies.search("Synthetic Mobile", 0).all { it.name.value.isNotBlank() })
+        val pending = worker.companies.request(company, worker.user)
+        assertEquals(RequestStatus.PENDING, pending.status)
+        expect(IdentityFailure.CONFLICT) { worker.companies.request(company, worker.user) }
+        rejectStatus(403) { worker.api.request("GET", "api/v1/notifications/my-notifications") }
+        assertEquals(RequestStatus.REJECTED, employer.companies.decide(pending, false, employer.user).status)
+        val retry = worker.companies.request(company, worker.user)
+        employer.companies.decide(retry, true, employer.user)
+        expect(IdentityFailure.SESSION_INVALID) { worker.iam.profile() }
+        assertNull(worker.store.read())
+        worker.signIn()
+        assertTrue(worker.user.hasActiveMembership)
+        assertEquals(company, worker.user.companyId)
+        val updated = worker.iam.updateProfile("Synthetic Mobile Edited", "+51 900 000 000")
+        assertEquals(updated, worker.iam.restore())
+        assertTrue(employer.companies.members(employer.user).any { it.id == worker.user.id })
+        employer.companies.revoke(updated, employer.user)
+        expect(IdentityFailure.SESSION_INVALID) { worker.iam.profile() }
+        worker.signIn()
+        assertEquals(MembershipStatus.REVOKED, worker.user.membershipStatus)
+        rejectStatus(403) { worker.api.request("GET", "api/v1/incidents") }
+        worker.companies.request(company, worker.user)
+        val foreign = LocalAccount(url).register().createCompany()
+        rejectStatus(404) { foreign.api.request("GET", "api/v1/companies/${company.value}/membership-requests") }
+        listOf(worker, employer, foreign).forEach { it.iam.logout() }
+        println("LIVE_SELF_SERVICE_IAM_PASSED (synthetic local accounts only)")
     }
-
     private suspend fun expect(reason: IdentityFailure, action: suspend () -> Any?) {
         try { action(); fail("Expected rejection") } catch (e: IdentityException) { assertEquals(reason, e.reason) }
+    }
+    private suspend fun rejectStatus(status: Int, action: suspend () -> Any?) {
+        try { action(); fail("Expected HTTP rejection") } catch (e: ApiException) { assertEquals(status, e.status) }
     }
 }
