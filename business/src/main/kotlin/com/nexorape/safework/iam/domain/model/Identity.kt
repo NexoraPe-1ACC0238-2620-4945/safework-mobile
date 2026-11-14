@@ -45,17 +45,6 @@ class Password private constructor(val value: String) {
     }
 }
 
-class InvitationProof private constructor(val value: String) {
-    override fun toString() = "InvitationProof([redacted])"
-    companion object {
-        fun of(raw: String): InvitationProof {
-            val value = raw.trim()
-            require(value.isNotEmpty() && value.length <= 2048)
-            return InvitationProof(value)
-        }
-    }
-}
-
 @JvmInline
 value class PhoneNumber private constructor(val value: String) {
     companion object {
@@ -68,16 +57,26 @@ value class PhoneNumber private constructor(val value: String) {
     }
 }
 
-enum class Role { WORKER, EMPLOYER, ADMIN }
+enum class Role { WORKER, EMPLOYER }
+enum class MembershipStatus { UNASSIGNED, ACTIVE, REVOKED }
 
 data class UserProfile(
     val id: UserId,
-    val companyId: CompanyId,
+    val companyId: CompanyId?,
     val fullName: FullName,
     val email: EmailAddress,
     val phone: PhoneNumber?,
     val roles: Set<Role>,
-)
+    val membershipStatus: MembershipStatus = if (companyId == null) MembershipStatus.UNASSIGNED else MembershipStatus.ACTIVE,
+) {
+    init {
+        require(roles.isNotEmpty())
+        require((membershipStatus == MembershipStatus.UNASSIGNED) == (companyId == null))
+    }
+    val hasActiveMembership: Boolean get() = membershipStatus == MembershipStatus.ACTIVE && companyId != null
+    val canAccessCompany: Boolean get() = hasActiveMembership && (Role.WORKER in roles || Role.EMPLOYER in roles)
+    val isEmployer: Boolean get() = hasActiveMembership && Role.EMPLOYER in roles
+}
 
 private fun wellFormed(value: String): Boolean {
     var index = 0

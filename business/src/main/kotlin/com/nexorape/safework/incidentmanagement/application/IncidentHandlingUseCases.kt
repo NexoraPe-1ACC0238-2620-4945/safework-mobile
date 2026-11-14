@@ -6,7 +6,7 @@ import com.nexorape.safework.incidentmanagement.domain.repositories.*
 
 class IncidentHandlingUseCases(private val repository: IncidentHandlingRepository) {
     suspend fun ownAssignments(actor: UserProfile): List<Assignment> {
-        if (Role.WORKER !in actor.roles && Role.EMPLOYER !in actor.roles) failure(IncidentFailure.FORBIDDEN)
+        if (!actor.canAccessCompany) failure(IncidentFailure.FORBIDDEN)
         return repository.ownAssignments().also { list ->
             if (list.any { it.responsibleId != actor.id }) failure(IncidentFailure.INVALID_RESPONSE)
         }
@@ -36,7 +36,7 @@ class IncidentHandlingUseCases(private val repository: IncidentHandlingRepositor
             failure(IncidentFailure.INVALID_RESPONSE)
         return response
     }
-    private fun employer(actor: UserProfile) { if (Role.EMPLOYER !in actor.roles) failure(IncidentFailure.FORBIDDEN) }
+    private fun employer(actor: UserProfile) { if (!actor.isEmployer) failure(IncidentFailure.FORBIDDEN) }
     private fun sameCompany(incident: Incident, actor: UserProfile) { if (incident.companyId != actor.companyId) failure(IncidentFailure.NOT_FOUND) }
     private fun failure(reason: IncidentFailure): Nothing = throw IncidentException(reason)
 }

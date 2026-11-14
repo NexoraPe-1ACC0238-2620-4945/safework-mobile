@@ -28,7 +28,7 @@ class IdentityHttpTest {
     private lateinit var store: MemorySessions
     private lateinit var api: ApiClient
     private lateinit var useCases: IdentityUseCases
-    private val profile = """{"id":1,"companyId":2,"fullName":"Synthetic Worker","email":"synthetic@example.test","phoneNumber":null,"createdAt":"2026-10-08T12:00:00Z","updatedAt":"2026-10-08T12:00:00Z","roles":["WORKER"]}"""
+    private val profile = """{"id":1,"companyId":2,"fullName":"Synthetic Worker","email":"synthetic@example.test","phoneNumber":null,"createdAt":"2026-10-08T12:00:00Z","updatedAt":"2026-10-08T12:00:00Z","roles":["WORKER"],"membershipStatus":"ACTIVE"}"""
     @Before
     fun setup() {
         server = MockWebServer().apply {
@@ -45,7 +45,7 @@ class IdentityHttpTest {
         respond(200, """{"id":1,"username":"synthetic@example.test","token":"synthetic-invalid-token"}""")
         respond(200, profile)
         val user = useCases.login(" Synthetic@Example.Test ", "SyntheticPass12")
-        assertEquals(2L, user.companyId.value)
+        assertEquals(2L, user.companyId?.value)
         val login = server.takeRequest()
         assertEquals("/api/v1/authentication/sign-in", login.path)
         assertNull(login.getHeader("Authorization"))
@@ -58,14 +58,36 @@ class IdentityHttpTest {
         assertEquals("/api/v1/users/me", server.takeRequest().path)
     }
 
-    @Test fun signupOnlySendsInvitationAndNeverPersistsALogin() = runBlocking {
-        respond(201, profile)
-        val user = useCases.register("Synthetic Worker", "synthetic@example.test", "SyntheticPass12", "synthetic-invalid-proof")
+    @Test fun signupSendsOnlyPersonalDetailsAndNeverPersistsALogin() = runBlocking {
+        respond(201, profile.replace("\"companyId\":2", "\"companyId\":null").replace("\"ACTIVE\"", "\"UNASSIGNED\""))
+        val user = useCases.register("Synthetic Worker", "synthetic@example.test", "SyntheticPass12")
         assertEquals("WORKER", user.roles.single().name)
+        assertNull(user.companyId)
+        assertFalse(user.canAccessCompany)
         val request = server.takeRequest()
         val body = JsonParser.parseString(request.body.readUtf8()).asJsonObject
-        assertEquals(setOf("fullName", "emailAddress", "password", "invitationToken"), body.keySet())
+        assertEquals(setOf("fullName", "emailAddress", "password"), body.keySet())
         assertNull(request.getHeader("Authorization")); assertNull(store.read())
+    }
+
+    @Test fun signupDistinguishesDuplicateEmailFromBackendStateFailure() = runBlocking {
+        respond(409, """{"code":"EMAIL_UNAVAILABLE","message":"Not displayed"}""")
+        fails(IdentityFailure.EMAIL_UNAVAILABLE) {
+            useCases.register("Synthetic Worker", "synthetic@example.test", "SyntheticPass12")
+        }
+        respond(409, """{"code":"STATE_CONFLICT","message":"Not displayed"}""")
+        fails(IdentityFailure.SERVER) {
+            useCases.register("Synthetic Worker", "synthetic@example.test", "SyntheticPass12")
+        }
+        assertNull(store.read())
+    }
+
+    @Test fun malformedConflictResponseDoesNotInventAnEmailCollision() = runBlocking {
+        respond(409, "not-json")
+        fails(IdentityFailure.SERVER) {
+            useCases.register("Synthetic Worker", "synthetic@example.test", "SyntheticPass12")
+        }
+        assertNull(store.read())
     }
 
     @Test fun invalidLoginDoesNotPersistCredentials() = runBlocking {

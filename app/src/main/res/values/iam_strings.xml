@@ -2,7 +2,7 @@
     <string name="iam_login_heading">Log in to SafeWork</string>
     <string name="iam_login_subtitle">Log in to your company account.</string>
     <string name="iam_register_heading">Join your team</string>
-    <string name="iam_register_subtitle">Create your account with a company invitation.</string>
+    <string name="iam_register_subtitle">Create your account and choose your company after signing in.</string>
     <string name="iam_profile_subtitle">Your account and company details.</string>
     <string name="iam_edit_subtitle">Keep your contact details up to date.</string>
     <string name="iam_workplace_heading">Your workplace</string>
@@ -12,8 +12,6 @@
     <string name="iam_password">Password</string>
     <string name="iam_create_account">Create account</string>
     <string name="iam_full_name">Full name</string>
-    <string name="iam_invitation">Invitation code</string>
-    <string name="iam_invitation_help">Ask your company for an invitation linked to your email. New accounts are registered as workers.</string>
     <string name="iam_password_help">Use 12–64 characters and at most 64 UTF-8 bytes. Name: up to 120 characters.</string>
     <string name="iam_register">Register</string>
     <string name="iam_back_login">Back to login</string>
@@ -34,12 +32,11 @@
     <string name="iam_retry">Retry</string>
     <string name="iam_registered">Account created. Log in with your credentials.</string>
     <string name="iam_profile_saved">Profile saved.</string>
-    <string name="iam_error_input">Check the email, name, invitation and password or phone limits.</string>
+    <string name="iam_error_input">Check the email, name and password or phone limits.</string>
     <string name="iam_error_credentials">Email or password is incorrect.</string>
     <string name="iam_error_session">Your session is no longer valid. Log in again.</string>
     <string name="iam_error_forbidden">Your account does not have permission for this action.</string>
     <string name="iam_error_email">This email cannot be registered.</string>
-    <string name="iam_error_invitation">The invitation is invalid, expired, already used or linked to another email.</string>
     <string name="iam_error_rate">Too many attempts. Wait a minute before trying again.</string>
     <string name="iam_error_network">Unable to connect. Check your connection and retry.</string>
     <string name="iam_error_storage">The session could not be saved securely. Try again.</string>

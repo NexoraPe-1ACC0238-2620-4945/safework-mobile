@@ -4,19 +4,21 @@ Native Android application for SafeWork, by NexoraPe. UPC course 1ACC0238, acade
 
 ## Current scope
 
-The app implements IAM: login, invitation-based WORKER registration, own profile and profile editing, validated session restoration and server logout. Incident Management supports current-company list/detail/reporting, editable manual location with optional one-shot device coordinates, responsible self-assignment and start/close lifecycle actions. Notification Management adds the current authenticated recipient's notifications. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
+The app implements login, registration without invitation codes, profiles, company creation/search, membership requests and company-scoped employer approvals and revocations. An account can exist without a company; incidents and notifications become available only after membership is active. Incident Management retains list/detail/reporting, editable manual location with optional one-shot device coordinates, responsible self-assignment and start/close lifecycle actions. SafeWork keeps localized English/Latin American Spanish UI, light/dark appearance and safe drawing insets.
 
 - `app`: Android, Compose Presentation and HTTP/secure-storage Infrastructure.
 - `business`: pure Kotlin Domain/Application, identity value objects, repository contracts and use cases.
 - Dependency direction: `app` → `business`.
 - Base package/application ID: `com.nexorape.safework`; Android 8.0/API26 minimum, compile/target35, JDK17.
 
-Android ADMIN functions, refresh tokens, reassignment, push notifications and mark-as-read are not included. This is **not the complete TB1 delivery**. The corrected current-course backend runs locally for validation; no deployed API is supplied. The IAM and Daniel prerequisites are retained from `test`. PR #5 adds Francisco's incident handling and notifications, plus a follow-up fix that prevents a failed notification query from displaying a false empty state. Corrected-code verification passed 31 tests without failures or skips, including three real local integrations (91 HTTP requests), debug/unsigned-release builds and lint (0 errors / 9 existing warnings). Physical take/start/confirmed-close/notification consultation, cancellation, reopening and simulated 503 recovery were checked. Full TalkBack, broader large-text/device coverage and negative physical UI checks remain pending. See the validation records below.
+Global ADMIN and invitation workflows are not part of this version. Refresh tokens, reassignment, push delivery and mark-as-read remain outside the current scope. The self-service branch preserves the existing incident and notification features; see docs/self-service-onboarding.md for the current contract and verification. Earlier validation documents remain as historical records.
 
 The UI increment adds a shared violet design system with bundled Raleway/Montserrat fonts and retained OFL licenses, a compact SafeWork header and bottom navigation (Profile, Incidents, Alerts / Perfil, Incidentes, Avisos). IAM forms, incident cards/actions and notification cards reuse the theme; password visibility is accessible and temporary. Business rules, HTTP contracts and IAM sessions are retained. See [UI verification and physical review limits](docs/ui-design-system-validation.md) for this increment; earlier feature checks do not certify every redesigned screen.
 
 ## Documentation
 
+- [Self-service onboarding, deployment requirements and current validation](docs/self-service-onboarding.md)
+- [Beginner walkthrough: structure, Kotlin syntax and login flow](docs/app-walkthrough.md)
 - [Architecture and planned context packages](docs/architecture.md)
 - [Reference comparison and toolchain rationale](docs/reference-review.md)
 - [Current and historical backend contract review](docs/backend-contract-review.md)
@@ -77,11 +79,11 @@ sh ./gradlew :app:assembleDebug :business:build :app:lintDebug
 
 ## Backend configuration
 
-Release has no default API URL. Supply an approved root HTTPS URL with `-Psafework.apiUrl=https://YOUR_APPROVED_HOST/`. No historical fallback exists. Debug defaults to `http://127.0.0.1:18082/`, for an explicitly started local current-course backend; it does not start a server.
+The public Render API is configured in `gradle.properties`, so Android Studio Run and ordinary debug/release builds use it. Override the root HTTPS URL with `-Psafework.apiUrl=https://YOUR_APPROVED_HOST/`; debug uses it unless `safework.localApiUrl` is supplied. Without either property, debug falls back to `http://127.0.0.1:18086/` for an explicitly started local self-service backend. Building does not start a server.
 
-For a USB phone, run `adb reverse tcp:18082 tcp:18082` before launching. For the Android emulator, build with `-Psafework.localApiUrl=http://10.0.2.2:18082/`. Cleartext is limited to localhost/127.0.0.1/10.0.2.2 in debug and prohibited in release. Do not put credentials in Gradle properties or build configuration.
+For a USB phone using the local backend, run `adb reverse tcp:18086 tcp:18086` before launching. For the Android emulator, build with `-Psafework.localApiUrl=http://10.0.2.2:18086/`. An HTTPS Render build needs no USB reverse or laptop backend. Cleartext is limited to localhost/127.0.0.1/10.0.2.2 in debug and prohibited in release. Do not put credentials in Gradle properties or build configuration.
 
-Registration needs an invitation issued outside the mobile app by a permitted server operator for the same email/company. Roles and company cannot be selected publicly. Signup does not create a session; log in afterwards. Logout always clears this device; network failure is explicitly shown as unconfirmed server revocation, not a successful server logout. A revoked/expired session returns to login on restoration or the next protected request. See [IAM details](docs/iam-implementation.md).
+Register with name, email and password, then sign in. The Company tab lets an unassigned account create a company or request admission to an existing one. Its employer approves or rejects requests and can revoke worker access. There is no global administrator or invitation workflow. Company creation and approval revoke previous sessions; sign in again. Accounts remain bound to their first company after revocation. See [the self-service handoff](docs/self-service-onboarding.md) for current contracts and checks. Older IAM documents describe the previous implementation.
 
 ## Git workflow and contribution
 

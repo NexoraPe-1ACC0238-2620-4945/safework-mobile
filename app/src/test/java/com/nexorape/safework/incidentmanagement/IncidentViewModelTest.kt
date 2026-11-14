@@ -27,7 +27,7 @@ class IncidentViewModelTest {
             val location = CaptureIncidentLocation(object : LocationProvider { override suspend fun capture(): IncidentLocation? = null })
             val vm = IncidentViewModel(IncidentUseCases(repo), actor, location, events)
             runCurrent(); events.value++; runCurrent()
-            response.complete(listOf(Incident(IncidentId(5), actor.id, actor.companyId, IncidentTitle.of("Synthetic"),
+            response.complete(listOf(Incident(IncidentId(5), actor.id, requireNotNull(actor.companyId), IncidentTitle.of("Synthetic"),
                 IncidentDescription.of("Synthetic"), IncidentLocation.of("Manual"), IncidentStatus.OPEN, null, "Synthetic", null)))
             runCurrent()
             assertTrue(vm.state.value.items.isEmpty()); assertNull(vm.state.value.selected)

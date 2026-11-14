@@ -37,7 +37,7 @@ fun IdentityRoute(viewModel: IdentityViewModel, embedded: Boolean = false) {
 /** UI callbacks only. The existing ViewModel remains responsible for every IAM operation. */
 internal data class IdentityActions(
     val login: (String, String) -> Unit,
-    val register: (String, String, String, String) -> Unit,
+    val register: (String, String, String) -> Unit,
     val refresh: () -> Unit,
     val saveProfile: (String, String) -> Unit,
     val logout: () -> Unit,
@@ -71,6 +71,7 @@ internal fun IdentityContent(state: IdentityUiState, actions: IdentityActions, e
                 IdentityNotice.REGISTERED -> R.string.iam_registered
                 IdentityNotice.PROFILE_SAVED -> R.string.iam_profile_saved
                 IdentityNotice.LOGOUT_LOCAL_ONLY -> R.string.iam_logout_local_only
+                IdentityNotice.COMPANY_CREATED -> R.string.company_created_login
             }), success = it != IdentityNotice.LOGOUT_LOCAL_ONLY)
         }
         when (state.screen) {
@@ -106,11 +107,10 @@ private fun RegisterForm(state: IdentityUiState, actions: IdentityActions) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var proof by remember { mutableStateOf("") }
     SafeWorkCard {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Icon(SafeWorkIcons.Company, null, Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-            Text(stringResource(R.string.iam_invitation_help), style = MaterialTheme.typography.bodyMedium,
+            Text(stringResource(R.string.company_registration_help), style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
         }
         SafeWorkField(name, { name = it }, stringResource(R.string.iam_full_name), !state.busy, SafeWorkIcons.Person)
@@ -118,11 +118,10 @@ private fun RegisterForm(state: IdentityUiState, actions: IdentityActions) {
         SafeWorkSecretField(password, { password = it }, stringResource(R.string.iam_password), !state.busy)
         Text(stringResource(R.string.iam_password_help), style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        SafeWorkSecretField(proof, { proof = it }, stringResource(R.string.iam_invitation), !state.busy, allowReveal = false)
         SafeWorkPrimaryButton(stringResource(R.string.iam_register),
-            { actions.register(name, email, password, proof); password = ""; proof = "" }, !state.busy)
+            { actions.register(name, email, password); password = "" }, !state.busy)
     }
-    TextButton(onClick = { password = ""; proof = ""; actions.navigate(IdentityScreen.LOGIN) }, enabled = !state.busy,
+    TextButton(onClick = { password = ""; actions.navigate(IdentityScreen.LOGIN) }, enabled = !state.busy,
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
         Text(stringResource(R.string.iam_back_login))
     }
@@ -144,8 +143,13 @@ private fun Profile(state: IdentityUiState, actions: IdentityActions) {
             user.phone?.value ?: stringResource(R.string.iam_not_provided))
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
         Text(stringResource(R.string.iam_workplace_heading), style = MaterialTheme.typography.titleSmall)
-        Text(stringResource(R.string.iam_company, user.companyId.value), style = MaterialTheme.typography.bodyMedium)
-        Text(stringResource(R.string.iam_roles, user.roles.joinToString { it.name }),
+        Text(user.companyId?.let { stringResource(R.string.iam_company, it.value) }
+            ?: stringResource(R.string.company_unassigned), style = MaterialTheme.typography.bodyMedium)
+        Text(stringResource(membershipResource(user.membershipStatus)), style = MaterialTheme.typography.bodyMedium)
+        val employerLabel = stringResource(R.string.company_role_employer)
+        val workerLabel = stringResource(R.string.company_role_worker)
+        Text(stringResource(R.string.iam_roles, user.roles.joinToString {
+            if (it == com.nexorape.safework.iam.domain.model.Role.EMPLOYER) employerLabel else workerLabel }),
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         SafeWorkPrimaryButton(stringResource(R.string.iam_edit_profile),
             { actions.navigate(IdentityScreen.EDIT_PROFILE) }, !state.busy, SafeWorkIcons.Edit)
@@ -172,16 +176,23 @@ private fun EditProfile(state: IdentityUiState, actions: IdentityActions) {
         modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text(stringResource(R.string.iam_cancel)) }
 }
 
-private fun errorResource(error: IdentityFailure): Int = when (error) {
+internal fun errorResource(error: IdentityFailure): Int = when (error) {
     IdentityFailure.INVALID_INPUT -> R.string.iam_error_input
     IdentityFailure.INVALID_CREDENTIALS -> R.string.iam_error_credentials
     IdentityFailure.SESSION_INVALID -> R.string.iam_error_session
     IdentityFailure.FORBIDDEN -> R.string.iam_error_forbidden
     IdentityFailure.EMAIL_UNAVAILABLE -> R.string.iam_error_email
-    IdentityFailure.INVITATION_INVALID -> R.string.iam_error_invitation
+    IdentityFailure.CONFLICT -> R.string.company_error_conflict
+    IdentityFailure.NOT_FOUND -> R.string.company_error_not_found
     IdentityFailure.RATE_LIMITED -> R.string.iam_error_rate
     IdentityFailure.NETWORK -> R.string.iam_error_network
     IdentityFailure.STORAGE -> R.string.iam_error_storage
     IdentityFailure.NOT_CONFIGURED -> R.string.iam_error_configuration
     IdentityFailure.SERVER, IdentityFailure.INVALID_RESPONSE -> R.string.iam_error_server
+}
+
+internal fun membershipResource(status: com.nexorape.safework.iam.domain.model.MembershipStatus) = when (status) {
+    com.nexorape.safework.iam.domain.model.MembershipStatus.UNASSIGNED -> R.string.company_unassigned
+    com.nexorape.safework.iam.domain.model.MembershipStatus.ACTIVE -> R.string.company_active
+    com.nexorape.safework.iam.domain.model.MembershipStatus.REVOKED -> R.string.company_revoked
 }

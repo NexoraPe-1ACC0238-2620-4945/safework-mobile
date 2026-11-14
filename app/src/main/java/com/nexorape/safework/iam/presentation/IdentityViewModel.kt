@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 enum class IdentityScreen { RESTORING, LOGIN, REGISTER, PROFILE, EDIT_PROFILE }
-enum class IdentityNotice { REGISTERED, PROFILE_SAVED, LOGOUT_LOCAL_ONLY }
+enum class IdentityNotice { REGISTERED, PROFILE_SAVED, LOGOUT_LOCAL_ONLY, COMPANY_CREATED }
 
 data class IdentityUiState(
     val screen: IdentityScreen = IdentityScreen.RESTORING,
@@ -48,8 +48,8 @@ class IdentityViewModel(private val useCases: IdentityUseCases, invalidations: S
         IdentityUiState(screen = IdentityScreen.PROFILE, user = user)
     }
 
-    fun register(name: String, email: String, password: String, invitation: String) = perform {
-        val user = useCases.register(name, email, password, invitation)
+    fun register(name: String, email: String, password: String) = perform {
+        val user = useCases.register(name, email, password)
         IdentityUiState(screen = IdentityScreen.LOGIN, notice = IdentityNotice.REGISTERED, emailHint = user.email.value)
     }
 
@@ -70,6 +70,12 @@ class IdentityViewModel(private val useCases: IdentityUseCases, invalidations: S
         val outcome = useCases.logout()
         IdentityUiState(screen = IdentityScreen.LOGIN,
             notice = if (outcome == LogoutOutcome.LOCAL_ONLY) IdentityNotice.LOGOUT_LOCAL_ONLY else null)
+    }
+
+    fun companyCreated() = perform(isLogout = true) {
+        val email = state.value.user?.email?.value.orEmpty()
+        useCases.logout()
+        IdentityUiState(screen = IdentityScreen.LOGIN, emailHint = email, notice = IdentityNotice.COMPANY_CREATED)
     }
 
     fun navigate(screen: IdentityScreen) {
